@@ -1,0 +1,103 @@
+{
+  "app": {
+    "title": "Assets Store",
+    "subtitle": "Gerenciador de Ativos"
+  },
+  "menu": {
+    "list": "Listar",
+    "form": "Adicionar/Editar",
+    "settings": "Configurações",
+    "close": "Fechar"
+  },
+  "list": {
+    "title": "Lista de Ativos",
+    "subtitle": "Visualize e gerencie todos os seus ativos cadastrados",
+    "searchPlaceholder": "Pesquisar por título...",
+    "empty": "Nenhum ativo cadastrado ainda.",
+    "noResults": "Nenhum ativo encontrado com esse título.",
+    "emptyButton": "Adicionar Primeiro Ativo",
+    "errorLoading": "Erro ao carregar ativos.",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "deleteConfirm": "Tem certeza que deseja excluir este ativo?",
+    "createdAt": "Criado em"
+  },
+  "form": {
+    "titleAdd": "Adicionar Novo Ativo",
+    "titleEdit": "Editar Ativo",
+    "subtitleAdd": "Preencha os campos abaixo para cadastrar um novo ativo",
+    "subtitleEdit": "Atualize as informações do ativo",
+    "fieldTitle": "Título",
+    "fieldTitlePlaceholder": "Nome do ativo",
+    "fieldImage": "Imagem",
+    "fieldImagePlaceholder": "Caminho da imagem",
+    "fieldUnity": "Unidade",
+    "fieldUnityPlaceholder": "Ex: https://unity.com/products",
+    "fieldUnreal": "Unreal",
+    "fieldUnrealPlaceholder": "Ex: https://www.unrealengine.com",
+    "fieldLink": "Link",
+    "fieldLinkPlaceholder": "Ex: https://example.com/asset-info",
+    "selectFile": "Selecionar Arquivo",
+    "buttonAdd": "Adicionar",
+    "buttonUpdate": "Atualizar",
+    "buttonCancel": "Cancelar",
+    "required": "Por favor, preencha o título do ativo.",
+    "errorSave": "Erro ao salvar o ativo. Tente novamente.",
+    "errorLoad": "Erro ao carregar o ativo para edição.",
+    "errorFile": "Erro ao selecionar arquivo.",
+    "errorLoadImage": "Erro ao carregar a imagem.",
+    "notFound": "Ativo não encontrado."
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie as configurações do aplicativo",
+    "system": {
+      "title": "Informações do Sistema",
+      "version": "Versão",
+      "database": "Banco de Dados",
+      "databaseValue": "SQLite Local",
+      "platform": "Plataforma"
+    },
+    "appearance": {
+      "title": "Aparência",
+      "description": "Personalize a aparência do aplicativo",
+      "theme": "Tema",
+      "themeDefault": "Padrão (Roxo)",
+      "themeLight": "Claro (Azul)",
+      "themeDark": "Escuro (Roxo Escuro)"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolha o idioma da interface",
+      "label": "Idioma",
+      "ptBR": "Português (Brasil)",
+      "enUS": "English (US)"
+    },
+    "data": {
+      "title": "Dados",
+      "description": "Gerencie seus dados cadastrados",
+      "export": "Exportar Dados",
+      "import": "Importar Dados (Em breve)",
+      "exportSuccess": "Dados exportados com sucesso!",
+      "exportError": "Erro ao exportar dados. Tente novamente."
+    },
+    "danger": {
+      "title": "Zona de Perigo",
+      "description": "Ações irreversíveis",
+      "clear": "Limpar Todos os Dados",
+      "clearConfirm": "ATENÇÃO: Esta ação irá excluir TODOS os ativos cadastrados.\n\nEsta operação não pode ser desfeita!\n\nDeseja continuar?",
+      "clearDoubleConfirm": "Tem CERTEZA ABSOLUTA? Todos os dados serão perdidos!",
+      "clearSuccess": "Todos os dados foram excluídos com sucesso.",
+      "clearError": "Erro ao limpar dados. Tente novamente."
+    },
+    "about": {
+      "title": "Sobre",
+      "description": "Assets Store é um gerenciador profissional de ativos desenvolvido com Electron, TypeScript e SQLite.",
+      "madeWith": "Desenvolvido com ❤️ usando tecnologias modernas."
+    }
+  },
+  "common": {
+    "close": "Fechar",
+    "closeConfirm": "Deseja realmente fechar o aplicativo?"
+  }
+}
