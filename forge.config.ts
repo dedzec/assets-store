@@ -12,7 +12,7 @@ const config: ForgeConfig = {
     asar: true,
   },
   rebuildConfig: {
-    onlyModules: ['sqlite3'],
+    onlyModules: ['better-sqlite3'],
   },
   makers: [
     new MakerSquirrel({}), // Windows installer

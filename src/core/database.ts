@@ -1,66 +1,75 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
+/**
+ * Database Module
+ * Manages SQLite database connection and initialization using better-sqlite3
+ */
+
+import Database from 'better-sqlite3';
+import path from 'node:path';
 import { app } from 'electron';
-import fs from 'fs';
+import fs from 'node:fs';
+import { APP_CONFIG } from '../config/app.config';
 
 // Use project directory instead of userData
 const isDev = process.env.NODE_ENV !== 'production';
-const dbDir = isDev 
-  ? path.join(process.cwd(), 'data') 
-  : path.join(path.dirname(app.getPath('exe')), 'data');
+const dbDir = isDev
+  ? path.join(process.cwd(), APP_CONFIG.database.directory)
+  : path.join(path.dirname(app.getPath('exe')), APP_CONFIG.database.directory);
 
-// Ensure directory exists
+// Ensure directory and images subdirectory exist
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const dbPath = path.join(dbDir, 'database.sqlite');
+const imagesDir = path.join(dbDir, 'images');
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
+}
+
+const dbPath = path.join(dbDir, APP_CONFIG.database.name);
 
 console.log('Database path:', dbPath);
 
-class Database {
-  private db: sqlite3.Database;
+function createDatabase(): Database.Database {
+  const db = new Database(dbPath);
 
-  constructor() {
-    this.db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        console.error('Error opening database', err);
-      } else {
-        console.log('Database connected!');
-        this.init();
-      }
-    });
+  // Enable WAL mode for better performance
+  db.pragma('journal_mode = WAL');
+
+  // Create table if not exists
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS assets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      image TEXT,
+      unity TEXT,
+      unreal TEXT,
+      link TEXT,
+      createdAt TEXT DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
+
+  // Migration: add unreal column if it doesn't exist
+  const columns = db.pragma('table_info(assets)') as Array<{ name: string }>;
+  const hasUnreal = columns.some(col => col.name === 'unreal');
+  if (!hasUnreal) {
+    db.exec('ALTER TABLE assets ADD COLUMN unreal TEXT');
   }
 
-  private init() {
-    this.db.run(`
-      CREATE TABLE IF NOT EXISTS assets (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        image TEXT,
-        unity TEXT,
-        unreal TEXT,
-        link TEXT,
-        createdAt TEXT DEFAULT (datetime('now', 'localtime'))
-      )
-    `, (err) => {
-      if (err) {
-        console.error('Error creating table', err);
-      } else {
-        console.log('Table "assets" is ready.');
-        // Add unreal column if it doesn't exist (migration for existing databases)
-        this.db.run(`ALTER TABLE assets ADD COLUMN unreal TEXT`, (alterErr) => {
-          if (alterErr && !alterErr.message.includes('duplicate column')) {
-            console.error('Error adding unreal column', alterErr);
-          }
-        });
-      }
-    });
-  }
-
-  getDb() {
-    return this.db;
-  }
+  console.log('Database connected! Table "assets" is ready.');
+  return db;
 }
 
-export const database = new Database();
+/** Singleton database instance */
+let dbInstance: Database.Database | null = null;
+
+export function getDb(): Database.Database {
+  if (!dbInstance) {
+    dbInstance = createDatabase();
+  }
+  return dbInstance;
+}
+
+/** Returns the images directory path */
+export function getImagesDir(): string {
+  return imagesDir;
+}

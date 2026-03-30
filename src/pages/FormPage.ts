@@ -1,4 +1,5 @@
 import { Asset } from '../types';
+import { escapeHtml } from '../utils';
 
 export class FormPage {
   private container: HTMLElement;
@@ -50,7 +51,7 @@ export class FormPage {
             type="text" 
             id="assetTitle" 
             placeholder="${i18n.t('form.fieldTitlePlaceholder')}" 
-            value="${this.escapeHtml(asset?.title || '')}"
+            value="${escapeHtml(asset?.title || '')}"
             maxlength="255"
             required 
           />
@@ -63,7 +64,7 @@ export class FormPage {
               type="text" 
               id="assetImage" 
               placeholder="${i18n.t('form.fieldImagePlaceholder')}" 
-              value="${this.escapeHtml(asset?.image || '')}"
+              value="${escapeHtml(asset?.image || '')}"
               readonly
             />
             <button type="button" id="selectImageBtn" class="btn-secondary">
@@ -81,7 +82,7 @@ export class FormPage {
             id="assetUnity" 
             placeholder="${i18n.t('form.fieldUnityPlaceholder')}"
             rows="3"
-          >${this.escapeHtml(asset?.unity || '')}</textarea>
+          >${escapeHtml(asset?.unity || '')}</textarea>
         </div>
 
         <div class="form-group">
@@ -90,7 +91,7 @@ export class FormPage {
             id="assetUnreal" 
             placeholder="${i18n.t('form.fieldUnrealPlaceholder')}"
             rows="3"
-          >${this.escapeHtml(asset?.unreal || '')}</textarea>
+          >${escapeHtml(asset?.unreal || '')}</textarea>
         </div>
 
         <div class="form-group">
@@ -99,7 +100,7 @@ export class FormPage {
             id="assetLink" 
             placeholder="${i18n.t('form.fieldLinkPlaceholder')}"
             rows="3"
-          >${this.escapeHtml(asset?.link || '')}</textarea>
+          >${escapeHtml(asset?.link || '')}</textarea>
         </div>
 
         <div class="form-actions">
@@ -118,8 +119,7 @@ export class FormPage {
 
   private async loadAssetForEdit(id: number): Promise<void> {
     try {
-      const assets: Asset[] = await window.api.getAssets();
-      const asset = assets.find(a => a.id === id);
+      const asset: Asset | null = await window.api.getAssetById(id);
       
       if (asset) {
         this.renderForm(asset);
@@ -210,16 +210,5 @@ export class FormPage {
       console.error('Erro ao salvar asset:', error);
       alert(window.i18n.t('form.errorSave'));
     }
-  }
-
-  private escapeHtml(text: string): string {
-    const map: { [key: string]: string } = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return text.replace(/[&<>"']/g, (m) => map[m]);
   }
 }

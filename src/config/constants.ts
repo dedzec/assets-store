@@ -6,9 +6,11 @@
 // IPC Channel Names
 export const IPC_CHANNELS = {
   GET_ASSETS: 'get-assets',
+  GET_ASSET_BY_ID: 'get-asset-by-id',
   ADD_ASSET: 'add-asset',
   UPDATE_ASSET: 'update-asset',
   DELETE_ASSET: 'delete-asset',
+  CLEAR_ALL_ASSETS: 'clear-all-assets',
   SELECT_FILE: 'select-file',
   READ_IMAGE: 'read-image',
   OPEN_EXTERNAL: 'open-external',
