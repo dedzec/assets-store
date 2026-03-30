@@ -1,0 +1,110 @@
+# Checklist de Melhorias — Assets Store
+
+Checklist organizada por prioridade das melhorias a serem implementadas.
+
+---
+
+## P0 — Crítico (Bugs e riscos reais)
+
+- [x] **Mover IPC handlers para fora de `createWindow()`**
+  - Registrar `ipcMain.handle()` no top-level de `main.ts` para evitar duplicação no macOS (`app.on('activate')`)
+
+- [x] **Ativar `strict: true` no `tsconfig.json`**
+  - Corrigir todos os erros de tipo resultantes
+
+- [x] **Atualizar TypeScript para 5.x**
+  - Atualizar `typescript`, `@typescript-eslint/*` e `eslint` para versões atuais
+
+---
+
+## P1 — Alto (Qualidade e manutenibilidade)
+
+- [ ] **Substituir `sqlite3` por `better-sqlite3`**
+  - API síncrona, mais rápida, melhor compatibilidade cross-platform
+  - Refatorar `database.ts` e todos os handlers IPC
+
+- [ ] **Usar as constantes de `constants.ts` em todo o projeto**
+  - Ou remover o arquivo se não for usá-lo
+  - Corrigir inconsistência de storage keys (`'app-locale'` vs `'assetsstore-locale'`)
+
+- [ ] **Adicionar handler `get-asset-by-id` no main process**
+  - Evitar carregar todos os assets para editar um único
+
+- [ ] **Adicionar handler `clear-all-assets` no main process**
+  - Substituir loop de deletes individuais por `DELETE FROM assets`
+
+- [ ] **Remover métodos duplicados das pages**
+  - `escapeHtml`, `truncate` e `formatDate` devem ser usados de `src/utils/`
+  - `formatDate` no ListPage deve respeitar o locale atual do i18n
+
+- [ ] **Copiar imagens para diretório da app**
+  - Ao selecionar imagem, copiar para `data/images/`
+  - Salvar caminho relativo no banco ao invés de absoluto
+
+- [ ] **Adicionar validação de dados no main process**
+  - Validar campos obrigatórios e tipos nos handlers IPC de `add-asset` e `update-asset`
+
+---
+
+## P2 — Médio (UI/UX e DX)
+
+- [ ] **Substituir emojis por icon library (Lucide)**
+  - Instalar `lucide` e substituir todos os emojis por ícones SVG consistentes
+
+- [ ] **Substituir `alert()`/`confirm()` por modais custom**
+  - Criar componente de modal/dialog reutilizável com estilos do app
+
+- [ ] **Adicionar sistema de toast/notificações**
+  - Substituir `alert()` de sucesso/erro por toasts não-bloqueantes
+
+- [ ] **Adicionar loading states**
+  - Skeleton loaders ou spinners durante carregamento de assets e imagens
+
+- [ ] **Adicionar transições entre páginas**
+  - Fade ou slide ao navegar entre list/form/settings
+
+- [ ] **Configurar Vitest para testes unitários**
+  - Instalar `vitest` e criar testes para utils, database e handlers IPC
+
+- [ ] **Considerar framework de UI**
+  - Avaliar migração para Lit, Svelte ou React para melhor manutenibilidade
+
+---
+
+## P3 — Baixo (Nice-to-have)
+
+- [ ] **Atalhos de teclado**
+  - `Ctrl+N` → novo asset, `Ctrl+F` → buscar, `Escape` → cancelar
+
+- [ ] **Custom titlebar (frameless window)**
+  - Remover barra de título nativa e adicionar titlebar estilizada com botões min/max/close
+
+- [ ] **Implementar import de dados**
+  - Funcionalidade de importar JSON (botão existe mas está `disabled`)
+
+- [ ] **Adicionar `electron-log`**
+  - Logging persistente em disco para debugging em produção
+
+- [ ] **Paginação ou virtual scrolling**
+  - Para performance com centenas/milhares de assets
+
+- [ ] **Drag-and-drop para imagens**
+  - Permitir arrastar imagens para o formulário de cadastro
+
+- [ ] **Remover botão "Fechar" da sidebar**
+  - Usar apenas o botão nativo da janela (ou do custom titlebar)
+
+- [ ] **Considerar `electron-updater` para auto-update**
+  - Se o app for distribuído fora de lojas de apps
+
+---
+
+## Progresso
+
+| Prioridade | Total | Concluído | % |
+|---|---|---|---|
+| P0 — Crítico | 3 | 3 | 100% |
+| P1 — Alto | 7 | 0 | 0% |
+| P2 — Médio | 7 | 0 | 0% |
+| P3 — Baixo | 8 | 0 | 0% |
+| **Total** | **25** | **3** | **12%** |

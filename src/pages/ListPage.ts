@@ -173,7 +173,9 @@ export class ListPage {
     editButtons.forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = (e.currentTarget as HTMLElement).dataset.id;
-        window.router.navigateTo('form', { id });
+        if (id) {
+          window.router.navigateTo('form', { id });
+        }
       });
     });
 

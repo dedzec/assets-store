@@ -11,6 +11,6 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false,
-    "strict": false
+    "strict": true
   }
 }
