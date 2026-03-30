@@ -153,11 +153,7 @@ export class SettingsPage {
     if (!doubleConfirm) return;
 
     try {
-      const assets = await window.api.getAssets();
-      
-      for (const asset of assets) {
-        await window.api.deleteAsset(asset.id);
-      }
+      await window.api.clearAllAssets();
       
       alert(i18n.t('settings.danger.clearSuccess'));
       window.router.navigateTo('list');

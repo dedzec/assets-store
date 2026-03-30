@@ -123,11 +123,12 @@ export class ListPage {
       );
 
       const i18n = window.i18n;
+      const locale = i18n.getLocale();
       listContainer.innerHTML = assetsWithImages.map(asset => `
         <div class="asset-card" data-id="${asset.id}">
           ${asset.imageDataUrl ? `
             <div class="asset-image">
-              <img src="${asset.imageDataUrl}" alt="${this.escapeHtml(asset.title)}" />
+              <img src="${asset.imageDataUrl}" alt="${escapeHtml(asset.title)}" />
             </div>
           ` : `
             <div class="asset-image asset-image-placeholder">
@@ -135,11 +136,11 @@ export class ListPage {
             </div>
           `}
           <div class="asset-content">
-            <h3>${this.escapeHtml(asset.title)}</h3>
-            ${asset.unity ? `<p class="asset-unity">🎮 Unity: <a href="#" class="asset-link-btn" data-url="${this.escapeHtml(asset.unity)}" title="${this.escapeHtml(asset.unity)}">${this.truncate(asset.unity, 40)}</a></p>` : ''}
-            ${asset.unreal ? `<p class="asset-unreal">🎯 Unreal: <a href="#" class="asset-link-btn" data-url="${this.escapeHtml(asset.unreal)}" title="${this.escapeHtml(asset.unreal)}">${this.truncate(asset.unreal, 40)}</a></p>` : ''}
-            ${asset.link ? `<p class="asset-link">🔗 Link: <a href="#" class="asset-link-btn" data-url="${this.escapeHtml(asset.link)}" title="${this.escapeHtml(asset.link)}">${this.truncate(asset.link, 40)}</a></p>` : ''}
-            <small class="asset-date">${i18n.t('list.createdAt')}: ${this.formatDate(asset.createdAt)}</small>
+            <h3>${escapeHtml(asset.title)}</h3>
+            ${asset.unity ? `<p class="asset-unity">🎮 Unity: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unity)}" title="${escapeHtml(asset.unity)}">${truncate(asset.unity, 40)}</a></p>` : ''}
+            ${asset.unreal ? `<p class="asset-unreal">🎯 Unreal: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unreal)}" title="${escapeHtml(asset.unreal)}">${truncate(asset.unreal, 40)}</a></p>` : ''}
+            ${asset.link ? `<p class="asset-link">🔗 Link: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.link)}" title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</a></p>` : ''}
+            <small class="asset-date">${i18n.t('list.createdAt')}: ${formatDate(asset.createdAt, locale)}</small>
           </div>
           <div class="asset-actions">
             <button class="btn-edit" data-id="${asset.id}">
@@ -212,31 +213,5 @@ export class ListPage {
       console.error('Erro ao excluir asset:', error);
       alert(i18n.t('list.errorLoading'));
     }
-  }
-
-  private formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
-  }
-
-  private escapeHtml(text: string): string {
-    const map: { [key: string]: string } = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return text.replace(/[&<>"']/g, (m) => map[m]);
-  }
-
-  private truncate(text: string, length: number): string {
-    return text.length > length ? text.substring(0, length) + '...' : text;
   }
 }

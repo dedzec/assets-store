@@ -5,6 +5,7 @@
 
 import ptBR from '../locales/pt-BR.json';
 import enUS from '../locales/en-US.json';
+import { STORAGE_KEYS } from '../config/constants';
 
 export type Locale = 'pt-BR' | 'en-US';
 
@@ -13,7 +14,7 @@ type TranslationKeys = typeof ptBR;
 export class I18n {
   private currentLocale: Locale;
   private translations: Record<Locale, TranslationKeys>;
-  private readonly STORAGE_KEY = 'app-locale';
+  private readonly STORAGE_KEY = STORAGE_KEYS.LOCALE;
 
   constructor() {
     this.translations = {

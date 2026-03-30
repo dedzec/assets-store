@@ -1,8 +1,10 @@
+import { STORAGE_KEYS } from '../config/constants';
+
 export type Theme = 'light' | 'dark' | 'default';
 
 export class ThemeManager {
   private currentTheme: Theme;
-  private readonly STORAGE_KEY = 'app-theme';
+  private readonly STORAGE_KEY = STORAGE_KEYS.THEME;
 
   constructor() {
     this.currentTheme = this.loadTheme();

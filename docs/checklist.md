@@ -19,29 +19,29 @@ Checklist organizada por prioridade das melhorias a serem implementadas.
 
 ## P1 — Alto (Qualidade e manutenibilidade)
 
-- [ ] **Substituir `sqlite3` por `better-sqlite3`**
+- [x] **Substituir `sqlite3` por `better-sqlite3`**
   - API síncrona, mais rápida, melhor compatibilidade cross-platform
   - Refatorar `database.ts` e todos os handlers IPC
 
-- [ ] **Usar as constantes de `constants.ts` em todo o projeto**
+- [x] **Usar as constantes de `constants.ts` em todo o projeto**
   - Ou remover o arquivo se não for usá-lo
   - Corrigir inconsistência de storage keys (`'app-locale'` vs `'assetsstore-locale'`)
 
-- [ ] **Adicionar handler `get-asset-by-id` no main process**
+- [x] **Adicionar handler `get-asset-by-id` no main process**
   - Evitar carregar todos os assets para editar um único
 
-- [ ] **Adicionar handler `clear-all-assets` no main process**
+- [x] **Adicionar handler `clear-all-assets` no main process**
   - Substituir loop de deletes individuais por `DELETE FROM assets`
 
-- [ ] **Remover métodos duplicados das pages**
+- [x] **Remover métodos duplicados das pages**
   - `escapeHtml`, `truncate` e `formatDate` devem ser usados de `src/utils/`
   - `formatDate` no ListPage deve respeitar o locale atual do i18n
 
-- [ ] **Copiar imagens para diretório da app**
+- [x] **Copiar imagens para diretório da app**
   - Ao selecionar imagem, copiar para `data/images/`
   - Salvar caminho relativo no banco ao invés de absoluto
 
-- [ ] **Adicionar validação de dados no main process**
+- [x] **Adicionar validação de dados no main process**
   - Validar campos obrigatórios e tipos nos handlers IPC de `add-asset` e `update-asset`
 
 ---
@@ -104,7 +104,7 @@ Checklist organizada por prioridade das melhorias a serem implementadas.
 | Prioridade | Total | Concluído | % |
 |---|---|---|---|
 | P0 — Crítico | 3 | 3 | 100% |
-| P1 — Alto | 7 | 0 | 0% |
+| P1 — Alto | 7 | 7 | 100% |
 | P2 — Médio | 7 | 0 | 0% |
 | P3 — Baixo | 8 | 0 | 0% |
-| **Total** | **25** | **3** | **12%** |
+| **Total** | **25** | **10** | **40%** |
