@@ -20,7 +20,10 @@
     "edit": "Editar",
     "delete": "Excluir",
     "deleteConfirm": "Tem certeza que deseja excluir este ativo?",
-    "createdAt": "Criado em"
+    "createdAt": "Criado em",
+    "paginationOf": "de",
+    "paginationPrev": "Anterior",
+    "paginationNext": "Próximo"
   },
   "form": {
     "titleAdd": "Adicionar Novo Ativo",
@@ -46,7 +49,9 @@
     "errorLoad": "Erro ao carregar o ativo para edição.",
     "errorFile": "Erro ao selecionar arquivo.",
     "errorLoadImage": "Erro ao carregar a imagem.",
-    "notFound": "Ativo não encontrado."
+    "notFound": "Ativo não encontrado.",
+    "dropHint": "Ou arraste uma imagem aqui",
+    "errorUnsupportedType": "Tipo de arquivo não suportado. Use JPG, PNG, GIF, SVG ou WebP."
   },
   "settings": {
     "title": "Configurações",
@@ -77,9 +82,15 @@
       "title": "Dados",
       "description": "Gerencie seus dados cadastrados",
       "export": "Exportar Dados",
-      "import": "Importar Dados (Em breve)",
+      "import": "Importar Dados",
       "exportSuccess": "Dados exportados com sucesso!",
-      "exportError": "Erro ao exportar dados. Tente novamente."
+      "exportError": "Erro ao exportar dados. Tente novamente.",
+      "importConfirm": "Deseja importar {count} ativo(s)? Os dados serão adicionados aos existentes.",
+      "importSuccess": "{count} ativo(s) importado(s) com sucesso!",
+      "importError": "Erro ao importar dados. Tente novamente.",
+      "importInvalidFormat": "Formato inválido. O arquivo deve conter um array JSON.",
+      "importInvalidJson": "Arquivo JSON inválido. Verifique o formato.",
+      "importNoValid": "Nenhum item válido encontrado no arquivo."
     },
     "danger": {
       "title": "Zona de Perigo",

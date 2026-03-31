@@ -20,7 +20,10 @@
     "edit": "Edit",
     "delete": "Delete",
     "deleteConfirm": "Are you sure you want to delete this asset?",
-    "createdAt": "Created at"
+    "createdAt": "Created at",
+    "paginationOf": "of",
+    "paginationPrev": "Previous",
+    "paginationNext": "Next"
   },
   "form": {
     "titleAdd": "Add New Asset",
@@ -46,7 +49,9 @@
     "errorLoad": "Error loading the asset for editing.",
     "errorFile": "Error selecting file.",
     "errorLoadImage": "Error loading image.",
-    "notFound": "Asset not found."
+    "notFound": "Asset not found.",
+    "dropHint": "Or drag an image here",
+    "errorUnsupportedType": "Unsupported file type. Use JPG, PNG, GIF, SVG or WebP."
   },
   "settings": {
     "title": "Settings",
@@ -77,9 +82,15 @@
       "title": "Data",
       "description": "Manage your registered data",
       "export": "Export Data",
-      "import": "Import Data (Coming soon)",
+      "import": "Import Data",
       "exportSuccess": "Data exported successfully!",
-      "exportError": "Error exporting data. Please try again."
+      "exportError": "Error exporting data. Please try again.",
+      "importConfirm": "Do you want to import {count} asset(s)? Data will be added to existing records.",
+      "importSuccess": "{count} asset(s) imported successfully!",
+      "importError": "Error importing data. Please try again.",
+      "importInvalidFormat": "Invalid format. File must contain a JSON array.",
+      "importInvalidJson": "Invalid JSON file. Please check the format.",
+      "importNoValid": "No valid items found in the file."
     },
     "danger": {
       "title": "Danger Zone",

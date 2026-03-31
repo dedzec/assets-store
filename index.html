@@ -6,6 +6,24 @@
   </head>
   <body>
     <div id="app">
+      <!-- Custom Titlebar -->
+      <header class="titlebar" id="titlebar">
+        <div class="titlebar__drag">
+          <span class="titlebar__title">Assets Store</span>
+        </div>
+        <div class="titlebar__controls">
+          <button class="titlebar__btn titlebar__btn--minimize" id="titlebarMin" aria-label="Minimize">
+            <svg width="12" height="12" viewBox="0 0 12 12"><rect y="5" width="12" height="2" rx="1" fill="currentColor"/></svg>
+          </button>
+          <button class="titlebar__btn titlebar__btn--maximize" id="titlebarMax" aria-label="Maximize">
+            <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </button>
+          <button class="titlebar__btn titlebar__btn--close" id="titlebarClose" aria-label="Close">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1L11 11M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </header>
+
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-header">
@@ -25,10 +43,6 @@
           <button class="sidebar-menu-item" data-page="settings">
             <span class="menu-icon" data-icon="settings"></span>
             <span class="menu-text" data-i18n="menu.settings">Configurações</span>
-          </button>
-          <button class="sidebar-menu-item close-btn" id="closeApp">
-            <span class="menu-icon" data-icon="doorOpen"></span>
-            <span class="menu-text" data-i18n="menu.close">Fechar</span>
           </button>
         </nav>
       </aside>

@@ -65,8 +65,17 @@ document.querySelectorAll('.sidebar-menu-item[data-page]').forEach(item => {
   });
 });
 
-// Close app button
-document.getElementById('closeApp')?.addEventListener('click', async () => {
+// ─── Titlebar controls ───────────────────────────────────────────────
+
+document.getElementById('titlebarMin')?.addEventListener('click', () => {
+  window.api.minimizeWindow();
+});
+
+document.getElementById('titlebarMax')?.addEventListener('click', () => {
+  window.api.maximizeWindow();
+});
+
+document.getElementById('titlebarClose')?.addEventListener('click', async () => {
   const confirmed = await showConfirm(
     i18n.t('common.close'),
     i18n.t('common.closeConfirm'),
@@ -74,6 +83,52 @@ document.getElementById('closeApp')?.addEventListener('click', async () => {
   );
   if (confirmed) {
     await window.api.closeApp();
+  }
+});
+
+// ─── Keyboard shortcuts ──────────────────────────────────────────────
+
+document.addEventListener('keydown', (e: KeyboardEvent) => {
+  const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+  // Ctrl+N → navigate to add new asset
+  if (ctrlOrMeta && e.key === 'n') {
+    e.preventDefault();
+    router.navigateTo('form');
+    return;
+  }
+
+  // Ctrl+F → focus search input (only on list page)
+  if (ctrlOrMeta && e.key === 'f') {
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement | null;
+    if (searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+    return;
+  }
+
+  // Escape → cancel form / close search / go back to list
+  if (e.key === 'Escape') {
+    // If a modal is open, let the modal handle it
+    if (document.querySelector('.modal-overlay')) return;
+
+    const currentPage = router.getCurrentPage();
+    if (currentPage === 'form' || currentPage === 'settings') {
+      e.preventDefault();
+      router.navigateTo('list');
+    } else {
+      // On list page, clear search if active
+      const searchInput = document.getElementById('searchInput') as HTMLInputElement | null;
+      if (searchInput && searchInput.value) {
+        e.preventDefault();
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.blur();
+      }
+    }
+    return;
   }
 });
 

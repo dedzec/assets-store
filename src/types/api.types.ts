@@ -14,6 +14,10 @@ export interface ElectronAPI {
   clearAllAssets: () => Promise<{ changes: number }>;
   selectFile: () => Promise<string | null>;
   closeApp: () => Promise<void>;
+  minimizeWindow: () => Promise<void>;
+  maximizeWindow: () => Promise<void>;
+  isMaximized: () => Promise<boolean>;
   readImage: (imagePath: string) => Promise<string | null>;
   openExternal: (url: string) => Promise<boolean>;
+  importAssets: (assets: AssetInput[]) => Promise<{ imported: number }>;
 }

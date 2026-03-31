@@ -15,6 +15,10 @@ export const IPC_CHANNELS = {
   READ_IMAGE: 'read-image',
   OPEN_EXTERNAL: 'open-external',
   CLOSE_APP: 'close-app',
+  MINIMIZE_WINDOW: 'minimize-window',
+  MAXIMIZE_WINDOW: 'maximize-window',
+  IS_MAXIMIZED: 'is-maximized',
+  IMPORT_ASSETS: 'import-assets',
 } as const;
 
 // Route Names

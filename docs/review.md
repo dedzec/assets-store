@@ -190,3 +190,30 @@ Zero configuração de testes (nenhum test framework no `package.json`). Para um
 ## 6. NOTA GERAL: 6/10
 
 O projeto tem uma base funcional sólida com boas práticas de segurança Electron. A organização é decente. Os principais problemas são: toolchain desatualizado, ausência de framework UI levando a código imperativo frágil, código morto (constantes não usadas), e pequenos bugs potenciais (IPC handlers duplicados, storage keys inconsistentes). Com as correções P0 e P1, sobe facilmente para 8/10.
+
+---
+
+## 7. AVALIAÇÃO — electron-updater (Auto-Update)
+
+### Recomendação
+**Não implementar neste momento.** O `electron-updater` é mais adequado quando:
+- O app é distribuído fora de lojas (ex: via GitHub Releases, S3, etc.)
+- Há um servidor de updates configurado (Hazel, Nuts, etc.)
+- O app já tem uma base de usuários que precisa receber patches frequentes
+
+### Motivos para adiar
+1. **Complexidade de infra**: Requer code signing (macOS/Windows) e um backend de release
+2. **Electron Forge**: O ecossistema de auto-update do Forge usa `@electron-forge/publisher-*` que se integra com GitHub/S3, mas exige configuração de CI/CD
+3. **Estágio do projeto**: O app ainda está em fase de desenvolvimento ativo — auto-update é mais valioso em produção estável
+
+### Quando implementar
+Quando o app for distribuído para usuários finais, adicionar:
+```bash
+npm install electron-updater
+```
+E configurar no main process:
+```ts
+import { autoUpdater } from 'electron-updater';
+autoUpdater.checkForUpdatesAndNotify();
+```
+Combinado com GitHub Releases + `@electron-forge/publisher-github`.
