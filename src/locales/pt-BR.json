@@ -98,6 +98,12 @@
   },
   "common": {
     "close": "Fechar",
-    "closeConfirm": "Deseja realmente fechar o aplicativo?"
+    "closeConfirm": "Deseja realmente fechar o aplicativo?",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Atenção",
+    "info": "Informação"
   }
 }

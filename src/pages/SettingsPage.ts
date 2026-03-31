@@ -1,3 +1,6 @@
+import { icons } from '../utils';
+import { showConfirm, toast } from '../components';
+
 export class SettingsPage {
   private container: HTMLElement;
 
@@ -13,13 +16,13 @@ export class SettingsPage {
 
     this.container.innerHTML = `
       <div class="page-header">
-        <h2>⚙️ ${i18n.t('settings.title')}</h2>
+        <h2>${icons.settings(28)} ${i18n.t('settings.title')}</h2>
         <p>${i18n.t('settings.subtitle')}</p>
       </div>
       
       <div class="settings-content">
         <div class="settings-section">
-          <h3>📊 ${i18n.t('settings.system.title')}</h3>
+          <h3>${icons.barChart(24)} ${i18n.t('settings.system.title')}</h3>
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">${i18n.t('settings.system.version')}:</span>
@@ -37,7 +40,7 @@ export class SettingsPage {
         </div>
 
         <div class="settings-section">
-          <h3>🎨 ${i18n.t('settings.appearance.title')}</h3>
+          <h3>${icons.palette(24)} ${i18n.t('settings.appearance.title')}</h3>
           <p class="section-description">${i18n.t('settings.appearance.description')}</p>
           <div class="setting-item">
             <label for="themeSelect">${i18n.t('settings.appearance.theme')}:</label>
@@ -50,7 +53,7 @@ export class SettingsPage {
         </div>
 
         <div class="settings-section">
-          <h3>🌐 ${i18n.t('settings.language.title')}</h3>
+          <h3>${icons.globe(24)} ${i18n.t('settings.language.title')}</h3>
           <p class="section-description">${i18n.t('settings.language.description')}</p>
           <div class="setting-item">
             <label for="languageSelect">${i18n.t('settings.language.label')}:</label>
@@ -62,26 +65,26 @@ export class SettingsPage {
         </div>
 
         <div class="settings-section">
-          <h3>💾 ${i18n.t('settings.data.title')}</h3>
+          <h3>${icons.hardDrive(24)} ${i18n.t('settings.data.title')}</h3>
           <p class="section-description">${i18n.t('settings.data.description')}</p>
           <button class="btn-secondary" id="exportBtn">
-            📤 ${i18n.t('settings.data.export')}
+            ${icons.download(16)} ${i18n.t('settings.data.export')}
           </button>
           <button class="btn-secondary" id="importBtn" disabled>
-            📥 ${i18n.t('settings.data.import')}
+            ${icons.upload(16)} ${i18n.t('settings.data.import')}
           </button>
         </div>
 
         <div class="settings-section danger-zone">
-          <h3>⚠️ ${i18n.t('settings.danger.title')}</h3>
+          <h3>${icons.alertTriangle(24)} ${i18n.t('settings.danger.title')}</h3>
           <p class="section-description">${i18n.t('settings.danger.description')}</p>
           <button class="btn-danger" id="clearDataBtn">
-            🗑️ ${i18n.t('settings.danger.clear')}
+            ${icons.delete(16)} ${i18n.t('settings.danger.clear')}
           </button>
         </div>
 
         <div class="settings-section">
-          <h3>ℹ️ ${i18n.t('settings.about.title')}</h3>
+          <h3>${icons.info(24)} ${i18n.t('settings.about.title')}</h3>
           <p class="about-text">
             <strong>Assets Store</strong> ${i18n.t('settings.about.description')}
           </p>
@@ -135,31 +138,37 @@ export class SettingsPage {
       link.click();
       
       URL.revokeObjectURL(url);
-      alert(i18n.t('settings.data.exportSuccess'));
+      toast.success(i18n.t('settings.data.exportSuccess'));
     } catch (error) {
       console.error('Erro ao exportar dados:', error);
-      alert(i18n.t('settings.data.exportError'));
+      toast.error(i18n.t('settings.data.exportError'));
     }
   }
 
   private async handleClearData(): Promise<void> {
     const i18n = window.i18n;
-    const confirmed = confirm(i18n.t('settings.danger.clearConfirm'));
-
+    const confirmed = await showConfirm(
+      i18n.t('settings.danger.title'),
+      i18n.t('settings.danger.clearConfirm'),
+      'danger',
+    );
     if (!confirmed) return;
 
-    const doubleConfirm = confirm(i18n.t('settings.danger.clearDoubleConfirm'));
-    
+    const doubleConfirm = await showConfirm(
+      i18n.t('settings.danger.title'),
+      i18n.t('settings.danger.clearDoubleConfirm'),
+      'danger',
+    );
     if (!doubleConfirm) return;
 
     try {
       await window.api.clearAllAssets();
       
-      alert(i18n.t('settings.danger.clearSuccess'));
+      toast.success(i18n.t('settings.danger.clearSuccess'));
       window.router.navigateTo('list');
     } catch (error) {
       console.error('Erro ao limpar dados:', error);
-      alert(i18n.t('settings.danger.clearError'));
+      toast.error(i18n.t('settings.danger.clearError'));
     }
   }
 }

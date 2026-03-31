@@ -4,8 +4,9 @@
  */
 
 import { Asset } from '../types';
-import { escapeHtml, truncate } from '../utils';
+import { escapeHtml, truncate, icons } from '../utils';
 import { formatDate } from '../utils/date.utils';
+import { showConfirm, toast } from '../components';
 
 export class ListPage {
   private container: HTMLElement;
@@ -19,12 +20,12 @@ export class ListPage {
     const i18n = window.i18n;
     this.container.innerHTML = `
       <div class="page-header">
-        <h2>📋 ${i18n.t('list.title')}</h2>
+        <h2>${icons.list(28)} ${i18n.t('list.title')}</h2>
         <p>${i18n.t('list.subtitle')}</p>
       </div>
       <div class="search-container">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon">${icons.search(20)}</span>
           <input 
             type="text"
             id="searchInput" 
@@ -34,11 +35,32 @@ export class ListPage {
           <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
         </div>
       </div>
-      <div id="assetsList" class="assets-grid"></div>
+      <div id="assetsList" class="assets-grid">
+        ${this.renderSkeletons()}
+      </div>
     `;
 
     await this.loadAssets();
     this.attachSearchListeners();
+  }
+
+  /** Renders skeleton loading cards */
+  private renderSkeletons(count = 3): string {
+    return Array.from({ length: count }, () => `
+      <div class="skeleton-card">
+        <div class="skeleton-pulse skeleton-card__image"></div>
+        <div class="skeleton-card__body">
+          <div class="skeleton-pulse skeleton-card__title"></div>
+          <div class="skeleton-pulse skeleton-card__line"></div>
+          <div class="skeleton-pulse skeleton-card__line"></div>
+          <div class="skeleton-pulse skeleton-card__line skeleton-card__line--short"></div>
+        </div>
+        <div class="skeleton-card__footer">
+          <div class="skeleton-pulse skeleton-card__btn"></div>
+          <div class="skeleton-pulse skeleton-card__btn"></div>
+        </div>
+      </div>
+    `).join('');
   }
 
   private attachSearchListeners() {
@@ -94,12 +116,12 @@ export class ListPage {
         const button = searchQuery 
           ? '' 
           : `<button class="btn-primary" onclick="window.router.navigateTo('form')">
-              ➕ ${i18n.t('list.emptyButton')}
+              ${icons.plus(18)} ${i18n.t('list.emptyButton')}
             </button>`;
         
         listContainer.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">${searchQuery ? '🔍' : '📭'}</div>
+            <div class="empty-icon">${searchQuery ? icons.search(64) : icons.inbox(64)}</div>
             <p>${message}</p>
             ${button}
           </div>
@@ -132,22 +154,22 @@ export class ListPage {
             </div>
           ` : `
             <div class="asset-image asset-image-placeholder">
-              <span>🖼️</span>
+              <span>${icons.image(48)}</span>
             </div>
           `}
           <div class="asset-content">
             <h3>${escapeHtml(asset.title)}</h3>
-            ${asset.unity ? `<p class="asset-unity">🎮 Unity: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unity)}" title="${escapeHtml(asset.unity)}">${truncate(asset.unity, 40)}</a></p>` : ''}
-            ${asset.unreal ? `<p class="asset-unreal">🎯 Unreal: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unreal)}" title="${escapeHtml(asset.unreal)}">${truncate(asset.unreal, 40)}</a></p>` : ''}
-            ${asset.link ? `<p class="asset-link">🔗 Link: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.link)}" title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</a></p>` : ''}
+            ${asset.unity ? `<p class="asset-unity">${icons.gamepad(16)} Unity: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unity)}" title="${escapeHtml(asset.unity)}">${truncate(asset.unity, 40)}</a></p>` : ''}
+            ${asset.unreal ? `<p class="asset-unreal">${icons.target(16)} Unreal: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unreal)}" title="${escapeHtml(asset.unreal)}">${truncate(asset.unreal, 40)}</a></p>` : ''}
+            ${asset.link ? `<p class="asset-link">${icons.link(16)} Link: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.link)}" title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</a></p>` : ''}
             <small class="asset-date">${i18n.t('list.createdAt')}: ${formatDate(asset.createdAt, locale)}</small>
           </div>
           <div class="asset-actions">
             <button class="btn-edit" data-id="${asset.id}">
-              ✏️ ${i18n.t('list.edit')}
+              ${icons.edit(16)} ${i18n.t('list.edit')}
             </button>
             <button class="btn-delete" data-id="${asset.id}">
-              🗑️ ${i18n.t('list.delete')}
+              ${icons.delete(16)} ${i18n.t('list.delete')}
             </button>
           </div>
         </div>
@@ -159,7 +181,7 @@ export class ListPage {
       const i18n = window.i18n;
       listContainer.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">❌</div>
+          <div class="empty-icon">${icons.alertTriangle(64)}</div>
           <p>${i18n.t('list.errorLoading')}</p>
         </div>
       `;
@@ -200,9 +222,12 @@ export class ListPage {
 
   private async deleteAsset(id: number) {
     const i18n = window.i18n;
-    if (!confirm(i18n.t('list.deleteConfirm'))) {
-      return;
-    }
+    const confirmed = await showConfirm(
+      i18n.t('list.delete'),
+      i18n.t('list.deleteConfirm'),
+      'danger',
+    );
+    if (!confirmed) return;
 
     try {
       await window.api.deleteAsset(id);
@@ -211,7 +236,7 @@ export class ListPage {
       await this.loadAssets();
     } catch (error) {
       console.error('Erro ao excluir asset:', error);
-      alert(i18n.t('list.errorLoading'));
+      toast.error(i18n.t('list.errorLoading'));
     }
   }
 }

@@ -98,6 +98,12 @@
   },
   "common": {
     "close": "Close",
-    "closeConfirm": "Do you really want to close the application?"
+    "closeConfirm": "Do you really want to close the application?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information"
   }
 }
