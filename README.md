@@ -3,9 +3,11 @@
 > **Professional Asset Management System** - A modern desktop application for managing Unity, Unreal Engine, and general web assets with an elegant and intuitive interface.
 
 [![Electron](https://img.shields.io/badge/Electron-39.1.2-47848F?style=flat&logo=electron)](https://www.electronjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.5.4-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4.21-646CFF?style=flat&logo=vite)](https://vitejs.dev/)
-[![SQLite](https://img.shields.io/badge/SQLite-5.1.7-003B57?style=flat&logo=sqlite)](https://www.sqlite.org/)
+[![better--sqlite3](https://img.shields.io/badge/better--sqlite3-12.8-003B57?style=flat&logo=sqlite)](https://github.com/WiseLibs/better-sqlite3)
+[![Lucide](https://img.shields.io/badge/Lucide_Icons-SVG-F56565?style=flat)](https://lucide.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-4.1-6E9F18?style=flat&logo=vitest)](https://vitest.dev/)
 
 ---
 
@@ -37,8 +39,9 @@
 - 🌍 **Multilingual** - Full support for Portuguese (pt-BR) and English (en-US)
 - 🎨 **Themeable** - Three beautiful themes (Default/Purple, Light/Blue, Dark/Purple)
 - 🔒 **Secure** - Proper IPC communication with contextBridge
-- 📦 **Type-Safe** - 100% TypeScript with modular type definitions
-- ⚡ **Fast** - Vite bundler for lightning-fast development
+- 📦 **Type-Safe** - 100% TypeScript with strict mode
+- ⚡ **Fast** - Vite bundler + better-sqlite3 sync API
+- 🧪 **Tested** - Vitest unit tests for utilities
 
 ---
 
@@ -67,6 +70,11 @@
 | 🎯 **Intuitive Navigation** | Sidebar menu for quick page switching |
 | 💡 **Visual Feedback** | Hover effects, active states, and smooth transitions |
 | ⚡ **Performance** | Efficient rendering and minimal resource usage |
+| 🌟 **Lucide Icons** | Professional SVG icon library instead of emojis |
+| 📣 **Toast Notifications** | Non-blocking success/error feedback |
+| 💬 **Custom Modals** | Styled confirm/alert dialogs replacing native popups |
+| ⏳ **Loading Skeletons** | Animated placeholders during data loading |
+| 🎬 **Page Transitions** | Smooth fade-in animations between pages |
 
 ---
 
@@ -77,9 +85,10 @@
 | Technology | Version | Purpose |
 |------------|---------|---------|
 | **Electron** | 39.1.2 | Cross-platform desktop framework |
-| **TypeScript** | 4.5.4 | Type-safe JavaScript |
+| **TypeScript** | 5.9 | Type-safe JavaScript (strict mode) |
 | **Vite** | 5.4.21 | Fast bundler and dev server |
-| **SQLite3** | 5.1.7 | Local database engine |
+| **better-sqlite3** | 12.8 | Synchronous SQLite engine |
+| **Lucide** | latest | SVG icon library |
 | **Node.js** | Latest LTS | Runtime environment |
 
 ### Development Tools
@@ -87,15 +96,16 @@
 | Tool | Version | Purpose |
 |------|---------|---------|
 | **Electron Forge** | 7.10.2 | Build and packaging |
+| **Vitest** | 4.1 | Unit testing framework |
 | **ESLint** | 8.57.1 | Code linting |
-| **TypeScript ESLint** | 5.62.0 | TypeScript linting rules |
+| **TypeScript ESLint** | 8.20 | TypeScript linting rules |
 
 ### Architecture Pattern
 
 - **Main Process**: Handles system operations, database, IPC
 - **Renderer Process**: UI rendering and user interactions
 - **Preload Script**: Secure IPC bridge via contextBridge
-- **Modular Structure**: Organized into config, core, pages, types, utils
+- **Modular Structure**: Organized into config, core, components, pages, types, utils
 
 ---
 
@@ -114,11 +124,16 @@ AssetsStore/
 │   │   └── constants.ts              # Global constants (IPC channels, routes, keys)
 │   │
 │   ├── 📂 core/                      # Core application logic
-│   │   ├── database.ts               # SQLite database class & queries
-│   │   ├── i18n.ts                   # Internationalization manager
-│   │   ├── router.ts                 # Client-side page routing
-│   │   ├── theme.ts                  # Theme management system
-│   │   └── index.ts                  # Core exports
+│   │   ├─ database.ts               # SQLite database module (better-sqlite3)
+│   │   ├─ i18n.ts                   # Internationalization manager
+│   │   ├─ router.ts                 # Client-side page routing
+│   │   ├─ theme.ts                  # Theme management system
+│   │   └─ index.ts                  # Core exports
+│   │
+│   ├─ 📂 components/                # Reusable UI components
+│   │   ├─ modal.ts                  # Modal/dialog component
+│   │   ├─ toast.ts                  # Toast notification component
+│   │   └─ index.ts                  # Component exports
 │   │
 │   ├── 📂 locales/                   # Translation files
 │   │   ├── pt-BR.json                # Portuguese (Brazil) translations
@@ -142,8 +157,7 @@ AssetsStore/
 │   ├── 📂 utils/                     # Utility functions
 │   │   ├── string.utils.ts           # String manipulation (escape, truncate, etc.)
 │   │   ├── date.utils.ts             # Date formatting & relative time
-│   │   ├── validation.utils.ts       # Input validation helpers
-│   │   └── index.ts                  # Utility exports
+│   │   ├── validation.utils.ts       # Input validation helpers│   │   ├─ icons.ts                  # Lucide icon helpers│   │   └── index.ts                  # Utility exports
 │   │
 │   ├── main.ts                       # Electron main process (IPC handlers)
 │   ├── preload.ts                    # Preload script (contextBridge)
@@ -221,6 +235,8 @@ This will:
 | **Make** | `npm run make` | Create distributable installers |
 | **Publish** | `npm run publish` | Publish to distribution channels |
 | **Lint** | `npm run lint` | Run ESLint on TypeScript files |
+| **Test** | `npm run test` | Run unit tests with Vitest |
+| **Test Watch** | `npm run test:watch` | Run tests in watch mode |
 
 ---
 
@@ -350,11 +366,12 @@ interface Asset {
 
 - **Config**: Centralized settings and constants
 - **Core**: Essential services (database, i18n, router, theme)
+- **Components**: Reusable UI components (modal, toast)
 - **Types**: TypeScript interfaces and type definitions
-- **Utils**: Reusable helper functions
+- **Utils**: Reusable helper functions + Lucide icon wrappers
 - **Pages**: UI components for each route
 - **Locales**: Translation JSON files
-- **Styles**: CSS with theme variables
+- **Styles**: CSS with theme variables, animations, and component styles
 
 ---
 
@@ -506,10 +523,20 @@ Output: `out/make/`
 
 ### Testing
 
-Currently, the project does not include automated tests. Consider adding:
-- Unit tests for utilities
-- Integration tests for IPC communication
-- E2E tests for user workflows
+The project uses **Vitest** for unit testing. Tests cover utility functions (string, date, validation).
+
+```bash
+# Run tests once
+npm run test
+
+# Run in watch mode
+npm run test:watch
+```
+
+Test files are located in the `tests/` directory:
+- `string.utils.test.ts` — escapeHtml, truncate, capitalize, toKebabCase
+- `date.utils.test.ts` — formatDate with locale support
+- `validation.utils.test.ts` — URL validation, empty checks, file extensions, file size
 
 ---
 
@@ -541,7 +568,9 @@ Built with modern web technologies:
 - [Electron](https://www.electronjs.org/) - Build cross-platform desktop apps
 - [TypeScript](https://www.typescriptlang.org/) - JavaScript with syntax for types
 - [Vite](https://vitejs.dev/) - Next generation frontend tooling
-- [SQLite](https://www.sqlite.org/) - Self-contained, serverless database
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) - Fast, synchronous SQLite3
+- [Lucide](https://lucide.dev/) - Beautiful & consistent SVG icons
+- [Vitest](https://vitest.dev/) - Blazing fast unit test framework
 
 ---
 
@@ -550,7 +579,9 @@ Built with modern web technologies:
 - [Electron Documentation](https://www.electronjs.org/docs/latest)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [Vite Guide](https://vitejs.dev/guide/)
-- [SQLite Documentation](https://www.sqlite.org/docs.html)
+- [better-sqlite3 API](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md)
+- [Lucide Icons](https://lucide.dev/icons/)
+- [Vitest Documentation](https://vitest.dev/guide/)
 - [Electron Forge Documentation](https://www.electronforge.io/)
 
 ---

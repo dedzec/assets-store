@@ -48,26 +48,26 @@ Checklist organizada por prioridade das melhorias a serem implementadas.
 
 ## P2 — Médio (UI/UX e DX)
 
-- [ ] **Substituir emojis por icon library (Lucide)**
+- [x] **Substituir emojis por icon library (Lucide)**
   - Instalar `lucide` e substituir todos os emojis por ícones SVG consistentes
 
-- [ ] **Substituir `alert()`/`confirm()` por modais custom**
+- [x] **Substituir `alert()`/`confirm()` por modais custom**
   - Criar componente de modal/dialog reutilizável com estilos do app
 
-- [ ] **Adicionar sistema de toast/notificações**
+- [x] **Adicionar sistema de toast/notificações**
   - Substituir `alert()` de sucesso/erro por toasts não-bloqueantes
 
-- [ ] **Adicionar loading states**
+- [x] **Adicionar loading states**
   - Skeleton loaders ou spinners durante carregamento de assets e imagens
 
-- [ ] **Adicionar transições entre páginas**
+- [x] **Adicionar transições entre páginas**
   - Fade ou slide ao navegar entre list/form/settings
 
-- [ ] **Configurar Vitest para testes unitários**
+- [x] **Configurar Vitest para testes unitários**
   - Instalar `vitest` e criar testes para utils, database e handlers IPC
 
-- [ ] **Considerar framework de UI**
-  - Avaliar migração para Lit, Svelte ou React para melhor manutenibilidade
+- [x] **Considerar framework de UI**
+  - Avaliado: manter vanilla TS por ora — app é pequeno e auto-contido; migração para Lit/Svelte é recomendada se a complexidade crescer
 
 ---
 
@@ -105,6 +105,6 @@ Checklist organizada por prioridade das melhorias a serem implementadas.
 |---|---|---|---|
 | P0 — Crítico | 3 | 3 | 100% |
 | P1 — Alto | 7 | 7 | 100% |
-| P2 — Médio | 7 | 0 | 0% |
+| P2 — Médio | 7 | 7 | 100% |
 | P3 — Baixo | 8 | 0 | 0% |
-| **Total** | **25** | **10** | **40%** |
+| **Total** | **25** | **17** | **68%** |

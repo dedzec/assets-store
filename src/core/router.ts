@@ -38,6 +38,12 @@ export class Router {
     
     const page = new PageClass(this.container);
     await page.render(params);
+
+    // Trigger page-enter animation
+    this.container.classList.remove('page-transition-enter');
+    // Force reflow to restart animation
+    void this.container.offsetWidth;
+    this.container.classList.add('page-transition-enter');
   }
 
   getCurrentPage(): string {

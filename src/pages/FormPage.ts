@@ -1,5 +1,6 @@
 import { Asset } from '../types';
-import { escapeHtml } from '../utils';
+import { escapeHtml, icons } from '../utils';
+import { showAlert, toast } from '../components';
 
 export class FormPage {
   private container: HTMLElement;
@@ -38,7 +39,7 @@ export class FormPage {
     
     this.container.innerHTML = `
       <div class="page-header">
-        <h2>${isEdit ? `✏️ ${i18n.t('form.titleEdit')}` : `➕ ${i18n.t('form.titleAdd')}`}</h2>
+        <h2>${isEdit ? `${icons.edit(28)} ${i18n.t('form.titleEdit')}` : `${icons.plus(28)} ${i18n.t('form.titleAdd')}`}</h2>
         <p>${isEdit ? i18n.t('form.subtitleEdit') : i18n.t('form.subtitleAdd')}</p>
       </div>
       
@@ -68,7 +69,7 @@ export class FormPage {
               readonly
             />
             <button type="button" id="selectImageBtn" class="btn-secondary">
-              📁 ${i18n.t('form.selectFile')}
+              ${icons.folderOpen(16)} ${i18n.t('form.selectFile')}
             </button>
           </div>
           <div id="imagePreviewContainer">
@@ -105,10 +106,10 @@ export class FormPage {
 
         <div class="form-actions">
           <button type="submit" class="btn-primary">
-            ${isEdit ? `💾 ${i18n.t('form.buttonUpdate')}` : `➕ ${i18n.t('form.buttonAdd')}`}
+            ${isEdit ? `${icons.save(16)} ${i18n.t('form.buttonUpdate')}` : `${icons.plus(16)} ${i18n.t('form.buttonAdd')}`}
           </button>
           <button type="button" id="cancelBtn" class="btn-secondary">
-            ❌ ${i18n.t('form.buttonCancel')}
+            ${icons.close(16)} ${i18n.t('form.buttonCancel')}
           </button>
         </div>
       </form>
@@ -124,12 +125,12 @@ export class FormPage {
       if (asset) {
         this.renderForm(asset);
       } else {
-        alert(window.i18n.t('form.notFound'));
+        await showAlert(window.i18n.t('common.warning'), window.i18n.t('form.notFound'), 'warning');
         window.router.navigateTo('list');
       }
     } catch (error) {
       console.error('Erro ao carregar asset:', error);
-      alert(window.i18n.t('form.errorLoad'));
+      toast.error(window.i18n.t('form.errorLoad'));
       window.router.navigateTo('list');
     }
   }
@@ -172,7 +173,7 @@ export class FormPage {
       }
     } catch (error) {
       console.error('Erro ao selecionar arquivo:', error);
-      alert(window.i18n.t('form.errorFile'));
+      toast.error(window.i18n.t('form.errorFile'));
     }
   }
 
@@ -194,7 +195,7 @@ export class FormPage {
     };
 
     if (!asset.title) {
-      alert(window.i18n.t('form.required'));
+      toast.warning(window.i18n.t('form.required'));
       return;
     }
 
@@ -208,7 +209,7 @@ export class FormPage {
       window.router.navigateTo('list');
     } catch (error) {
       console.error('Erro ao salvar asset:', error);
-      alert(window.i18n.t('form.errorSave'));
+      toast.error(window.i18n.t('form.errorSave'));
     }
   }
 }
