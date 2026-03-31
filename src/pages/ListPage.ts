@@ -11,7 +11,8 @@ import { showConfirm, toast } from '../components';
 export class ListPage {
   private container: HTMLElement;
   private allAssets: Asset[] = [];
-
+  private currentPage = 1;
+  private readonly pageSize = 12;
   constructor(container: HTMLElement) {
     this.container = container;
   }
@@ -107,6 +108,19 @@ export class ListPage {
             asset.title.toLowerCase().includes(searchQuery.toLowerCase())
           )
         : this.allAssets;
+
+      // Reset to page 1 on search
+      if (searchQuery) {
+        this.currentPage = 1;
+      }
+
+      const totalItems = filteredAssets.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / this.pageSize));
+      // Clamp current page
+      if (this.currentPage > totalPages) this.currentPage = totalPages;
+
+      const startIdx = (this.currentPage - 1) * this.pageSize;
+      const pageAssets = filteredAssets.slice(startIdx, startIdx + this.pageSize);
       
       if (filteredAssets.length === 0) {
         const i18n = window.i18n;
@@ -126,12 +140,13 @@ export class ListPage {
             ${button}
           </div>
         `;
+        this.removePagination();
         return;
       }
 
       // Load images in parallel
       const assetsWithImages = await Promise.all(
-        filteredAssets.map(async (asset) => {
+        pageAssets.map(async (asset) => {
           let imageDataUrl = null;
           if (asset.image) {
             try {
@@ -176,6 +191,7 @@ export class ListPage {
       `).join('');
 
       this.attachEventListeners();
+      this.renderPagination(totalPages, totalItems, searchQuery);
     } catch (error) {
       console.error('Erro ao carregar assets:', error);
       const i18n = window.i18n;
@@ -186,6 +202,57 @@ export class ListPage {
         </div>
       `;
     }
+  }
+
+  /** Render pagination controls below the grid */
+  private renderPagination(totalPages: number, totalItems: number, searchQuery: string): void {
+    // Remove existing pagination
+    this.removePagination();
+
+    if (totalPages <= 1) return;
+
+    const i18n = window.i18n;
+    const pagination = document.createElement('div');
+    pagination.className = 'pagination';
+    pagination.id = 'pagination';
+
+    const startItem = (this.currentPage - 1) * this.pageSize + 1;
+    const endItem = Math.min(this.currentPage * this.pageSize, totalItems);
+
+    pagination.innerHTML = `
+      <span class="pagination__info">${startItem}–${endItem} ${i18n.t('list.paginationOf')} ${totalItems}</span>
+      <div class="pagination__controls">
+        <button class="pagination__btn" id="paginationPrev" ${this.currentPage <= 1 ? 'disabled' : ''}>
+          ‹ ${i18n.t('list.paginationPrev')}
+        </button>
+        <span class="pagination__page">${this.currentPage} / ${totalPages}</span>
+        <button class="pagination__btn" id="paginationNext" ${this.currentPage >= totalPages ? 'disabled' : ''}>
+          ${i18n.t('list.paginationNext')} ›
+        </button>
+      </div>
+    `;
+
+    // Insert after assets grid
+    const grid = document.getElementById('assetsList');
+    grid?.parentElement?.insertBefore(pagination, grid.nextSibling);
+
+    // Attach pagination listeners
+    document.getElementById('paginationPrev')?.addEventListener('click', () => {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.loadAssets(searchQuery);
+      }
+    });
+    document.getElementById('paginationNext')?.addEventListener('click', () => {
+      if (this.currentPage < totalPages) {
+        this.currentPage++;
+        this.loadAssets(searchQuery);
+      }
+    });
+  }
+
+  private removePagination(): void {
+    document.getElementById('pagination')?.remove();
   }
 
   private attachEventListeners() {
@@ -233,6 +300,7 @@ export class ListPage {
       await window.api.deleteAsset(id);
       // Reload all assets from database
       this.allAssets = [];
+      this.currentPage = 1;
       await this.loadAssets();
     } catch (error) {
       console.error('Erro ao excluir asset:', error);

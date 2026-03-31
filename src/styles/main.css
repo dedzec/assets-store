@@ -29,11 +29,75 @@ body {
 #app {
   display: flex;
   height: 100vh;
+  padding-top: 36px; /* Space for titlebar */
+  position: relative;
+}
+
+/* ========== CUSTOM TITLEBAR ========== */
+.titlebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+  z-index: 9999;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.titlebar__drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  height: 100%;
+}
+
+.titlebar__title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.03em;
+}
+
+.titlebar__controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar__btn {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background 0.15s;
+  padding: 0;
+  border-radius: 0;
+}
+
+.titlebar__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.titlebar__btn--close:hover {
+  background: #e81123;
+  color: white;
 }
 
 /* ========== SIDEBAR ========== */
 .sidebar {
   width: 260px;
+  height: 100%;
   background: linear-gradient(180deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
   color: white;
   display: flex;
@@ -85,15 +149,6 @@ body {
 .sidebar-menu-item.active {
   background: rgba(255, 255, 255, 0.2);
   border-left: 4px solid white;
-}
-
-.sidebar-menu-item.close-btn {
-  margin-top: auto;
-  background: rgba(244, 67, 54, 0.2);
-}
-
-.sidebar-menu-item.close-btn:hover {
-  background: rgba(244, 67, 54, 0.4);
 }
 
 .menu-icon {
@@ -272,6 +327,35 @@ textarea {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* ========== DROP ZONE ========== */
+.drop-zone {
+  margin-top: 0.75rem;
+  padding: 1.25rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  text-align: center;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.drop-zone p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.drop-zone p:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-zone--active {
+  border-color: var(--primary-gradient-start);
+  background: rgba(102, 126, 234, 0.06);
+  color: var(--primary-gradient-start);
 }
 
 .form-actions {
@@ -787,7 +871,7 @@ button svg {
 /* ========== TOAST ========== */
 .toast-container {
   position: fixed;
-  top: 1rem;
+  top: calc(36px + 1rem);
   right: 1rem;
   z-index: 2000;
   display: flex;
@@ -890,6 +974,56 @@ button svg {
 
 .toast__close:hover {
   color: var(--text-primary);
+}
+
+/* ========== PAGINATION ========== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pagination__info {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pagination__page {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
+.pagination__btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination__btn:hover:not(:disabled) {
+  background: var(--hover-bg);
+  border-color: var(--primary-gradient-start);
+  color: var(--primary-gradient-start);
+}
+
+.pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ========== LOADING / SKELETON ========== */

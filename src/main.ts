@@ -7,11 +7,17 @@ import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import log from 'electron-log/main';
 import started from 'electron-squirrel-startup';
 import { getDb, getImagesDir } from './core/database';
 import { APP_CONFIG } from './config/app.config';
 import { IPC_CHANNELS } from './config/constants';
 import type { AssetInput, AssetUpdate } from './types/asset.types';
+
+// Configure electron-log
+log.initialize();
+log.transports.file.level = 'info';
+log.transports.console.level = 'debug';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -178,7 +184,7 @@ function registerIpcHandlers(): void {
       const mimeType = mimeTypes[ext] || 'image/jpeg';
       return `data:${mimeType};base64,${base64}`;
     } catch (error) {
-      console.error('Error reading image:', error);
+      log.error('Error reading image:', error);
       return null;
     }
   });
@@ -189,9 +195,59 @@ function registerIpcHandlers(): void {
       await shell.openExternal(url);
       return true;
     } catch (error) {
-      console.error('Error opening URL:', error);
+      log.error('Error opening URL:', error);
       return false;
     }
+  });
+
+  // ─── Window controls ────────────────────────────────────────────────
+
+  ipcMain.handle(IPC_CHANNELS.MINIMIZE_WINDOW, () => {
+    mainWindow?.minimize();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.MAXIMIZE_WINDOW, () => {
+    if (mainWindow?.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow?.maximize();
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.IS_MAXIMIZED, () => {
+    return mainWindow?.isMaximized() ?? false;
+  });
+
+  // ─── Import assets ──────────────────────────────────────────────────
+
+  ipcMain.handle(IPC_CHANNELS.IMPORT_ASSETS, (_, assets: unknown) => {
+    if (!Array.isArray(assets)) {
+      throw new Error('Invalid import data: expected an array');
+    }
+
+    const insert = db.prepare(
+      'INSERT INTO assets (title, image, unity, unreal, link) VALUES (?, ?, ?, ?, ?)'
+    );
+
+    const importMany = db.transaction((items: unknown[]) => {
+      let imported = 0;
+      for (const item of items) {
+        if (validateAssetInput(item)) {
+          insert.run(
+            item.title.trim(),
+            item.image ?? '',
+            item.unity ?? '',
+            item.unreal ?? '',
+            item.link ?? '',
+          );
+          imported++;
+        }
+      }
+      return imported;
+    });
+
+    const imported = importMany(assets);
+    return { imported };
   });
 }
 
@@ -203,6 +259,8 @@ const createWindow = (): void => {
     height: APP_CONFIG.window.height,
     minWidth: APP_CONFIG.window.minWidth,
     minHeight: APP_CONFIG.window.minHeight,
+    frame: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },

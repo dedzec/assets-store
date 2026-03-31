@@ -14,8 +14,12 @@ export const api = {
   clearAllAssets: () => ipcRenderer.invoke(IPC_CHANNELS.CLEAR_ALL_ASSETS),
   selectFile: () => ipcRenderer.invoke(IPC_CHANNELS.SELECT_FILE),
   closeApp: () => ipcRenderer.invoke(IPC_CHANNELS.CLOSE_APP),
+  minimizeWindow: () => ipcRenderer.invoke(IPC_CHANNELS.MINIMIZE_WINDOW),
+  maximizeWindow: () => ipcRenderer.invoke(IPC_CHANNELS.MAXIMIZE_WINDOW),
+  isMaximized: () => ipcRenderer.invoke(IPC_CHANNELS.IS_MAXIMIZED),
   readImage: (imagePath: string) => ipcRenderer.invoke(IPC_CHANNELS.READ_IMAGE, imagePath),
   openExternal: (url: string) => ipcRenderer.invoke(IPC_CHANNELS.OPEN_EXTERNAL, url),
+  importAssets: (assets: AssetInput[]) => ipcRenderer.invoke(IPC_CHANNELS.IMPORT_ASSETS, assets),
 };
 
 contextBridge.exposeInMainWorld('api', api);

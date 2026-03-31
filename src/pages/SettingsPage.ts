@@ -70,7 +70,7 @@ export class SettingsPage {
           <button class="btn-secondary" id="exportBtn">
             ${icons.download(16)} ${i18n.t('settings.data.export')}
           </button>
-          <button class="btn-secondary" id="importBtn" disabled>
+          <button class="btn-secondary" id="importBtn">
             ${icons.upload(16)} ${i18n.t('settings.data.import')}
           </button>
         </div>
@@ -102,11 +102,13 @@ export class SettingsPage {
     const themeSelect = document.getElementById('themeSelect') as HTMLSelectElement;
     const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
     const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
     const clearDataBtn = document.getElementById('clearDataBtn');
 
     themeSelect?.addEventListener('change', () => this.handleThemeChange(themeSelect.value as 'default' | 'light' | 'dark'));
     languageSelect?.addEventListener('change', () => this.handleLanguageChange(languageSelect.value as 'pt-BR' | 'en-US'));
     exportBtn?.addEventListener('click', () => this.handleExport());
+    importBtn?.addEventListener('click', () => this.handleImport());
     clearDataBtn?.addEventListener('click', () => this.handleClearData());
   }
 
@@ -143,6 +145,63 @@ export class SettingsPage {
       console.error('Erro ao exportar dados:', error);
       toast.error(i18n.t('settings.data.exportError'));
     }
+  }
+
+  private async handleImport(): Promise<void> {
+    const i18n = window.i18n;
+
+    // Create a hidden file input to pick JSON
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json,application/json';
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data: unknown = JSON.parse(text);
+
+        if (!Array.isArray(data)) {
+          toast.error(i18n.t('settings.data.importInvalidFormat'));
+          return;
+        }
+
+        // Validate that items have at least a title
+        const validItems = data.filter(
+          (item: unknown) =>
+            item && typeof item === 'object' &&
+            'title' in (item as Record<string, unknown>) &&
+            typeof (item as Record<string, string>).title === 'string' &&
+            (item as Record<string, string>).title.trim().length > 0,
+        );
+
+        if (validItems.length === 0) {
+          toast.warning(i18n.t('settings.data.importNoValid'));
+          return;
+        }
+
+        const confirmed = await showConfirm(
+          i18n.t('settings.data.import'),
+          i18n.t('settings.data.importConfirm').replace('{count}', String(validItems.length)),
+          'info',
+        );
+        if (!confirmed) return;
+
+        const result = await window.api.importAssets(validItems);
+        toast.success(i18n.t('settings.data.importSuccess').replace('{count}', String(result.imported)));
+      } catch (error) {
+        console.error('Erro ao importar dados:', error);
+        if (error instanceof SyntaxError) {
+          toast.error(i18n.t('settings.data.importInvalidJson'));
+        } else {
+          toast.error(i18n.t('settings.data.importError'));
+        }
+      }
+    });
+
+    fileInput.click();
   }
 
   private async handleClearData(): Promise<void> {

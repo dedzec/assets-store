@@ -72,6 +72,10 @@ export class FormPage {
               ${icons.folderOpen(16)} ${i18n.t('form.selectFile')}
             </button>
           </div>
+          <div id="dropZone" class="drop-zone">
+            <p>${icons.upload(24)}</p>
+            <p>${i18n.t('form.dropHint')}</p>
+          </div>
           <div id="imagePreviewContainer">
             ${imagePreviewHtml}
           </div>
@@ -139,40 +143,83 @@ export class FormPage {
     const form = document.getElementById('assetForm') as HTMLFormElement;
     const selectImageBtn = document.getElementById('selectImageBtn');
     const cancelBtn = document.getElementById('cancelBtn');
+    const dropZone = document.getElementById('dropZone');
 
     form.addEventListener('submit', (e) => this.handleSubmit(e));
     selectImageBtn?.addEventListener('click', () => this.handleSelectImage());
     cancelBtn?.addEventListener('click', () => window.router.navigateTo('list'));
+
+    // Drag & drop zone
+    if (dropZone) {
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drop-zone--active');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drop-zone--active');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drop-zone--active');
+        const file = e.dataTransfer?.files[0];
+        if (file) {
+          this.handleDroppedFile(file);
+        }
+      });
+    }
   }
 
   private async handleSelectImage(): Promise<void> {
     try {
       const filePath = await window.api.selectFile();
       if (filePath) {
-        const imageInput = document.getElementById('assetImage') as HTMLInputElement;
-        imageInput.value = filePath;
-        
-        // Read image and convert to base64 for preview
-        const base64Image = await window.api.readImage(filePath);
-        
-        // Update preview
-        const previewContainer = document.getElementById('imagePreviewContainer');
-        if (previewContainer && base64Image) {
-          previewContainer.innerHTML = `
-            <div class="image-preview">
-              <img src="${base64Image}" alt="Preview" />
-            </div>
-          `;
-        } else if (previewContainer) {
-          previewContainer.innerHTML = `
-            <div class="image-preview">
-              <p style="color: var(--text-secondary);">${window.i18n.t('form.errorLoadImage')}</p>
-            </div>
-          `;
-        }
+        await this.setImageFromPath(filePath);
       }
     } catch (error) {
       console.error('Erro ao selecionar arquivo:', error);
+      toast.error(window.i18n.t('form.errorFile'));
+    }
+  }
+
+  /** Handle a file dropped on the drop zone */
+  private async handleDroppedFile(file: File): Promise<void> {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.warning(window.i18n.t('form.errorUnsupportedType'));
+      return;
+    }
+
+    // Electron adds a `path` property to File objects from drag-and-drop
+    const filePath = (file as File & { path?: string }).path;
+    if (filePath) {
+      await this.setImageFromPath(filePath);
+    }
+  }
+
+  /** Set the image input and preview from a file path */
+  private async setImageFromPath(filePath: string): Promise<void> {
+    try {
+      const imageInput = document.getElementById('assetImage') as HTMLInputElement;
+      imageInput.value = filePath;
+
+      const base64Image = await window.api.readImage(filePath);
+
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      if (previewContainer && base64Image) {
+        previewContainer.innerHTML = `
+          <div class="image-preview">
+            <img src="${base64Image}" alt="Preview" />
+          </div>
+        `;
+      } else if (previewContainer) {
+        previewContainer.innerHTML = `
+          <div class="image-preview">
+            <p style="color: var(--text-secondary);">${window.i18n.t('form.errorLoadImage')}</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar imagem:', error);
       toast.error(window.i18n.t('form.errorFile'));
     }
   }

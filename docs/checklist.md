@@ -73,28 +73,28 @@ Checklist organizada por prioridade das melhorias a serem implementadas.
 
 ## P3 — Baixo (Nice-to-have)
 
-- [ ] **Atalhos de teclado**
+- [x] **Atalhos de teclado**
   - `Ctrl+N` → novo asset, `Ctrl+F` → buscar, `Escape` → cancelar
 
-- [ ] **Custom titlebar (frameless window)**
+- [x] **Custom titlebar (frameless window)**
   - Remover barra de título nativa e adicionar titlebar estilizada com botões min/max/close
 
-- [ ] **Implementar import de dados**
+- [x] **Implementar import de dados**
   - Funcionalidade de importar JSON (botão existe mas está `disabled`)
 
-- [ ] **Adicionar `electron-log`**
+- [x] **Adicionar `electron-log`**
   - Logging persistente em disco para debugging em produção
 
-- [ ] **Paginação ou virtual scrolling**
+- [x] **Paginação ou virtual scrolling**
   - Para performance com centenas/milhares de assets
 
-- [ ] **Drag-and-drop para imagens**
+- [x] **Drag-and-drop para imagens**
   - Permitir arrastar imagens para o formulário de cadastro
 
-- [ ] **Remover botão "Fechar" da sidebar**
+- [x] **Remover botão "Fechar" da sidebar**
   - Usar apenas o botão nativo da janela (ou do custom titlebar)
 
-- [ ] **Considerar `electron-updater` para auto-update**
+- [x] **Considerar `electron-updater` para auto-update**
   - Se o app for distribuído fora de lojas de apps
 
 ---
@@ -106,5 +106,5 @@ Checklist organizada por prioridade das melhorias a serem implementadas.
 | P0 — Crítico | 3 | 3 | 100% |
 | P1 — Alto | 7 | 7 | 100% |
 | P2 — Médio | 7 | 7 | 100% |
-| P3 — Baixo | 8 | 0 | 0% |
-| **Total** | **25** | **17** | **68%** |
+| P3 — Baixo | 8 | 8 | 100% |
+| **Total** | **25** | **25** | **100%** |

@@ -59,6 +59,8 @@
 | 📊 **Asset Listing** | Paginated view with asset cards showing all details |
 | ✏️ **Easy Editing** | Double-click any asset to edit its details |
 | 🗑️ **Safe Deletion** | Confirmation dialog before deleting assets |
+| 📥 **Import / Export** | Import and export assets as JSON files |
+| 🖱️ **Drag & Drop** | Drag images directly onto the form to upload |
 
 ### User Experience
 
@@ -75,6 +77,9 @@
 | 💬 **Custom Modals** | Styled confirm/alert dialogs replacing native popups |
 | ⏳ **Loading Skeletons** | Animated placeholders during data loading |
 | 🎬 **Page Transitions** | Smooth fade-in animations between pages |
+| 🖥️ **Custom Titlebar** | Frameless window with styled min/max/close buttons |
+| ⌨️ **Keyboard Shortcuts** | `Ctrl+N` new, `Ctrl+F` search, `Escape` cancel |
+| 📄 **Pagination** | Navigate large asset collections page by page |
 
 ---
 
@@ -89,6 +94,7 @@
 | **Vite** | 5.4.21 | Fast bundler and dev server |
 | **better-sqlite3** | 12.8 | Synchronous SQLite engine |
 | **Lucide** | latest | SVG icon library |
+| **electron-log** | latest | Persistent file logging |
 | **Node.js** | Latest LTS | Runtime environment |
 
 ### Development Tools
@@ -237,6 +243,14 @@ This will:
 | **Lint** | `npm run lint` | Run ESLint on TypeScript files |
 | **Test** | `npm run test` | Run unit tests with Vitest |
 | **Test Watch** | `npm run test:watch` | Run tests in watch mode |
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+N` | Navigate to **Add New Asset** form |
+| `Ctrl+F` | Focus the **search input** (on list page) |
+| `Escape` | Cancel current form / clear search / go back to list |
 
 ---
 
