@@ -173,10 +173,10 @@ export class ListPage {
             </div>
           `}
           <div class="asset-content">
-            <h3>${escapeHtml(asset.title)}</h3>
+            <h3>${escapeHtml(asset.title)}${asset.version ? `<span class="asset-version">v${escapeHtml(asset.version)}</span>` : ''}</h3>
             ${asset.unity ? `<p class="asset-unity">${icons.gamepad(16)} Unity: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unity)}" title="${escapeHtml(asset.unity)}">${truncate(asset.unity, 40)}</a></p>` : ''}
             ${asset.unreal ? `<p class="asset-unreal">${icons.target(16)} Unreal: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unreal)}" title="${escapeHtml(asset.unreal)}">${truncate(asset.unreal, 40)}</a></p>` : ''}
-            ${asset.link ? `<p class="asset-link">${icons.link(16)} Link: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.link)}" title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</a></p>` : ''}
+            ${asset.link ? `<p class="asset-link">${icons.link(16)} Link: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.link)}" title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</a>${asset.linkType ? `<span class="link-type-badge link-type-badge--${asset.linkType} link-type-badge--sm">${asset.linkType === 'local' ? icons.hardDrive(12) : icons.globe(12)}</span>` : ''}</p>` : ''}
             <small class="asset-date">${i18n.t('list.createdAt')}: ${formatDate(asset.createdAt, locale)}</small>
           </div>
           <div class="asset-actions">

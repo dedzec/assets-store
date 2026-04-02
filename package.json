@@ -18,7 +18,7 @@
     "lint": "eslint --ext .ts,.tsx .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rimraf package-lock.json node_modules build"
+    "clean": "rimraf package-lock.json node_modules build dist out output"
   },
   "dependencies": {
     "better-sqlite3": "^12.8.0",

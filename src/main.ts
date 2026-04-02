@@ -34,9 +34,11 @@ function validateAssetInput(asset: unknown): asset is AssetInput {
   return (
     typeof a.title === 'string' && a.title.trim().length > 0 &&
     (a.image === undefined || a.image === '' || typeof a.image === 'string') &&
+    (a.version === undefined || a.version === '' || typeof a.version === 'string') &&
     (a.unity === undefined || a.unity === '' || typeof a.unity === 'string') &&
     (a.unreal === undefined || a.unreal === '' || typeof a.unreal === 'string') &&
-    (a.link === undefined || a.link === '' || typeof a.link === 'string')
+    (a.link === undefined || a.link === '' || typeof a.link === 'string') &&
+    (a.linkType === undefined || a.linkType === '' || a.linkType === 'local' || a.linkType === 'cloud')
   );
 }
 
@@ -106,10 +108,10 @@ function registerIpcHandlers(): void {
     }
 
     const result = db.prepare(
-      'INSERT INTO assets (title, image, unity, unreal, link) VALUES (?, ?, ?, ?, ?)'
-    ).run(asset.title.trim(), imagePath, asset.unity ?? '', asset.unreal ?? '', asset.link ?? '');
+      'INSERT INTO assets (title, image, version, unity, unreal, link, linkType) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run(asset.title.trim(), imagePath, asset.version ?? '', asset.unity ?? '', asset.unreal ?? '', asset.link ?? '', asset.linkType ?? '');
 
-    return { id: result.lastInsertRowid, title: asset.title.trim(), image: imagePath, unity: asset.unity ?? '', unreal: asset.unreal ?? '', link: asset.link ?? '' };
+    return { id: result.lastInsertRowid, title: asset.title.trim(), image: imagePath, version: asset.version ?? '', unity: asset.unity ?? '', unreal: asset.unreal ?? '', link: asset.link ?? '', linkType: asset.linkType ?? '' };
   });
 
   // Update asset
@@ -125,8 +127,8 @@ function registerIpcHandlers(): void {
     }
 
     const result = db.prepare(
-      'UPDATE assets SET title = ?, image = ?, unity = ?, unreal = ?, link = ? WHERE id = ?'
-    ).run(asset.title.trim(), imagePath, asset.unity ?? '', asset.unreal ?? '', asset.link ?? '', asset.id);
+      'UPDATE assets SET title = ?, image = ?, version = ?, unity = ?, unreal = ?, link = ?, linkType = ? WHERE id = ?'
+    ).run(asset.title.trim(), imagePath, asset.version ?? '', asset.unity ?? '', asset.unreal ?? '', asset.link ?? '', asset.linkType ?? '', asset.id);
 
     return { changes: result.changes };
   });
@@ -226,7 +228,7 @@ function registerIpcHandlers(): void {
     }
 
     const insert = db.prepare(
-      'INSERT INTO assets (title, image, unity, unreal, link) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO assets (title, image, version, unity, unreal, link, linkType) VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
 
     const importMany = db.transaction((items: unknown[]) => {
@@ -236,9 +238,11 @@ function registerIpcHandlers(): void {
           insert.run(
             item.title.trim(),
             item.image ?? '',
+            item.version ?? '',
             item.unity ?? '',
             item.unreal ?? '',
             item.link ?? '',
+            item.linkType ?? '',
           );
           imported++;
         }

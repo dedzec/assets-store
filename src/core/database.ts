@@ -8,6 +8,7 @@ import path from 'node:path';
 import { app } from 'electron';
 import fs from 'node:fs';
 import { APP_CONFIG } from '../config/app.config';
+import { detectLinkType } from '../utils/string.utils';
 
 // Use project directory instead of userData
 const isDev = process.env.NODE_ENV !== 'production';
@@ -41,18 +42,43 @@ function createDatabase(): Database.Database {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
       image TEXT,
+      version TEXT DEFAULT '',
       unity TEXT,
       unreal TEXT,
       link TEXT,
+      linkType TEXT DEFAULT '',
       createdAt TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `);
 
-  // Migration: add unreal column if it doesn't exist
+  // Migrations — add columns that may not exist yet
   const columns = db.pragma('table_info(assets)') as Array<{ name: string }>;
-  const hasUnreal = columns.some(col => col.name === 'unreal');
-  if (!hasUnreal) {
+  const colNames = new Set(columns.map(c => c.name));
+
+  if (!colNames.has('unreal')) {
     db.exec('ALTER TABLE assets ADD COLUMN unreal TEXT');
+  }
+  if (!colNames.has('version')) {
+    db.exec("ALTER TABLE assets ADD COLUMN version TEXT DEFAULT ''");
+  }
+  if (!colNames.has('linkType')) {
+    db.exec("ALTER TABLE assets ADD COLUMN linkType TEXT DEFAULT ''");
+  }
+
+  // Backfill: detect linkType for existing assets that have a link but no linkType
+  const orphans = db.prepare("SELECT id, link FROM assets WHERE link != '' AND (linkType IS NULL OR linkType = '')").all() as Array<{ id: number; link: string }>;
+  if (orphans.length > 0) {
+    const update = db.prepare('UPDATE assets SET linkType = ? WHERE id = ?');
+    const backfill = db.transaction((rows: Array<{ id: number; link: string }>) => {
+      for (const row of rows) {
+        const type = detectLinkType(row.link);
+        if (type) {
+          update.run(type, row.id);
+        }
+      }
+    });
+    backfill(orphans);
+    console.log(`Backfilled linkType for ${orphans.length} existing asset(s).`);
   }
 
   console.log('Database connected! Table "assets" is ready.');

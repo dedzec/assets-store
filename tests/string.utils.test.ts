@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { escapeHtml, truncate, capitalize, toKebabCase } from '../src/utils/string.utils';
+import { escapeHtml, truncate, capitalize, toKebabCase, detectLinkType } from '../src/utils/string.utils';
 
 describe('escapeHtml', () => {
   it('escapes & < > " \'', () => {
@@ -68,5 +68,61 @@ describe('toKebabCase', () => {
 
   it('converts PascalCase to kebab-case', () => {
     expect(toKebabCase('HelloWorld')).toBe('hello-world');
+  });
+});
+
+describe('detectLinkType', () => {
+  it('returns empty string for empty input', () => {
+    expect(detectLinkType('')).toBe('');
+    expect(detectLinkType('   ')).toBe('');
+  });
+
+  // Cloud links
+  it('detects https URLs as cloud', () => {
+    expect(detectLinkType('https://drive.google.com/file/abc')).toBe('cloud');
+  });
+
+  it('detects http URLs as cloud', () => {
+    expect(detectLinkType('http://example.com/asset.zip')).toBe('cloud');
+  });
+
+  it('detects ftp URLs as cloud', () => {
+    expect(detectLinkType('ftp://files.server.com/assets/')).toBe('cloud');
+  });
+
+  it('detects s3 URLs as cloud', () => {
+    expect(detectLinkType('s3://my-bucket/assets/model.fbx')).toBe('cloud');
+  });
+
+  it('detects domain-like strings as cloud', () => {
+    expect(detectLinkType('drive.google.com/shared/abc')).toBe('cloud');
+    expect(detectLinkType('mega.nz/file/xyz')).toBe('cloud');
+  });
+
+  // Local links
+  it('detects Unix absolute paths as local', () => {
+    expect(detectLinkType('/home/user/assets/model.fbx')).toBe('local');
+  });
+
+  it('detects Windows paths as local', () => {
+    expect(detectLinkType('C:\\Users\\dev\\assets\\model.fbx')).toBe('local');
+    expect(detectLinkType('D:/Games/Assets/texture.png')).toBe('local');
+  });
+
+  it('detects home-relative paths as local', () => {
+    expect(detectLinkType('~/Documents/assets.zip')).toBe('local');
+  });
+
+  it('detects UNC paths as local', () => {
+    expect(detectLinkType('\\\\server\\share\\asset.fbx')).toBe('local');
+  });
+
+  it('detects file:// protocol as local', () => {
+    expect(detectLinkType('file:///home/user/model.fbx')).toBe('local');
+  });
+
+  it('detects relative paths as local', () => {
+    expect(detectLinkType('./assets/model.fbx')).toBe('local');
+    expect(detectLinkType('../shared/texture.png')).toBe('local');
   });
 });

@@ -1,5 +1,6 @@
 import { icons } from '../utils';
 import { showConfirm, toast } from '../components';
+import { THEME_PALETTES, PALETTE_COLORS, type ThemePalette, type ThemeMode } from '../core/theme';
 
 export class SettingsPage {
   private container: HTMLElement;
@@ -11,7 +12,6 @@ export class SettingsPage {
   render(): void {
     const i18n = window.i18n;
     const theme = window.themeManager;
-    const currentTheme = theme.getTheme();
     const currentLocale = i18n.getLocale();
 
     this.container.innerHTML = `
@@ -42,13 +42,37 @@ export class SettingsPage {
         <div class="settings-section">
           <h3>${icons.palette(24)} ${i18n.t('settings.appearance.title')}</h3>
           <p class="section-description">${i18n.t('settings.appearance.description')}</p>
+
           <div class="setting-item">
-            <label for="themeSelect">${i18n.t('settings.appearance.theme')}:</label>
-            <select id="themeSelect" class="setting-select">
-              <option value="default" ${currentTheme === 'default' ? 'selected' : ''}>${i18n.t('settings.appearance.themeDefault')}</option>
-              <option value="light" ${currentTheme === 'light' ? 'selected' : ''}>${i18n.t('settings.appearance.themeLight')}</option>
-              <option value="dark" ${currentTheme === 'dark' ? 'selected' : ''}>${i18n.t('settings.appearance.themeDark')}</option>
-            </select>
+            <label>${i18n.t('settings.appearance.palette')}:</label>
+            <div class="theme-palette-grid" id="paletteGrid">
+              ${THEME_PALETTES.map(p => {
+                const [start, end] = PALETTE_COLORS[p];
+                const active = theme.getPalette() === p ? ' active' : '';
+                const label = i18n.t(`settings.appearance.palette${p.charAt(0).toUpperCase() + p.slice(1)}`);
+                return `
+                  <button
+                    class="theme-palette-btn${active}"
+                    data-palette="${p}"
+                    title="${label}"
+                    style="background: linear-gradient(135deg, ${start} 0%, ${end} 100%)"
+                  >
+                    ${active ? `<span class="palette-check">${icons.check(16)}</span>` : ''}
+                  </button>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <label>${i18n.t('settings.appearance.mode')}:</label>
+            <div class="theme-mode-toggle" id="modeToggle">
+              <button class="mode-btn${theme.getMode() === 'light' ? ' active' : ''}" data-mode="light">
+                ${icons.sun(18)} ${i18n.t('settings.appearance.modeLight')}
+              </button>
+              <button class="mode-btn${theme.getMode() === 'dark' ? ' active' : ''}" data-mode="dark">
+                ${icons.moon(18)} ${i18n.t('settings.appearance.modeDark')}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -99,21 +123,43 @@ export class SettingsPage {
   }
 
   private attachEventListeners(): void {
-    const themeSelect = document.getElementById('themeSelect') as HTMLSelectElement;
+    const paletteGrid = document.getElementById('paletteGrid');
+    const modeToggle = document.getElementById('modeToggle');
     const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const clearDataBtn = document.getElementById('clearDataBtn');
 
-    themeSelect?.addEventListener('change', () => this.handleThemeChange(themeSelect.value as 'default' | 'light' | 'dark'));
+    paletteGrid?.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.theme-palette-btn');
+      if (!btn) return;
+      const palette = btn.dataset.palette as ThemePalette;
+      if (palette) this.handlePaletteChange(palette);
+    });
+
+    modeToggle?.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.mode-btn');
+      if (!btn) return;
+      const mode = btn.dataset.mode as ThemeMode;
+      if (mode) this.handleModeChange(mode);
+    });
+
     languageSelect?.addEventListener('change', () => this.handleLanguageChange(languageSelect.value as 'pt-BR' | 'en-US'));
     exportBtn?.addEventListener('click', () => this.handleExport());
     importBtn?.addEventListener('click', () => this.handleImport());
     clearDataBtn?.addEventListener('click', () => this.handleClearData());
   }
 
-  private handleThemeChange(theme: 'default' | 'light' | 'dark'): void {
-    window.themeManager.setTheme(theme);
+  private handlePaletteChange(palette: ThemePalette): void {
+    window.themeManager.setPalette(palette);
+    // Re-render to update active state
+    this.render();
+  }
+
+  private handleModeChange(mode: ThemeMode): void {
+    window.themeManager.setMode(mode);
+    // Re-render to update active state
+    this.render();
   }
 
   private handleLanguageChange(locale: 'pt-BR' | 'en-US'): void {

@@ -1,8 +1,7 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
-// import { MakerDeb } from '@electron-forge/maker-deb';
-// import { MakerRpm } from '@electron-forge/maker-rpm';
+import { MakerDeb } from '@electron-forge/maker-deb';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
@@ -10,6 +9,8 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    name: 'assets-store',
+    executableName: 'assets-store',
   },
   rebuildConfig: {
     onlyModules: ['better-sqlite3'],
@@ -17,10 +18,22 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({}), // Windows installer
     new MakerZIP({}, ['darwin', 'linux']), // macOS and Linux ZIP
-    // Uncomment below if you have rpmbuild installed for RPM packages
-    // new MakerRpm({}),
-    // Uncomment below if you have dpkg installed for DEB packages
-    // new MakerDeb({}),
+    new MakerDeb({
+      options: {
+        name: 'assets-store',
+        productName: 'Assets Store',
+        genericName: 'Asset Manager',
+        description: 'A professional asset manager built with Electron, TypeScript and SQLite.',
+        version: '1.0.0',
+        categories: ['Utility', 'Development'],
+        maintainer: 'dedzec <dedzec@gmail.com>',
+        homepage: 'https://github.com/dedzec/assets-store',
+        section: 'utils',
+        priority: 'optional',
+      },
+    }),
+    // NOTE: MakerRpm is not included — electron-installer-redhat generates
+    // an incompatible %install spec section on Arch Linux.
   ],
   plugins: [
     new VitePlugin({

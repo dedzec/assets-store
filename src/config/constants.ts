@@ -34,12 +34,9 @@ export const STORAGE_KEYS = {
   LOCALE: 'assetsstore-locale',
 } as const;
 
-// Theme Names
-export const THEMES = {
-  DEFAULT: 'default',
-  LIGHT: 'light',
-  DARK: 'dark',
-} as const;
+// Theme Palettes
+export const THEME_PALETTES = ['purple', 'blue', 'ocean', 'forest', 'sunset', 'rose'] as const;
+export const THEME_MODES = ['light', 'dark'] as const;
 
 // Locale Codes
 export const LOCALES = {

@@ -95,3 +95,6 @@ out/
 data/
 *.sqlite
 *.sqlite-journal
+
+# Local documentation (internal notes, not for publishing)
+docs/
