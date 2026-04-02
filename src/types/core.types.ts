@@ -4,7 +4,7 @@
  */
 
 import type { Locale } from '../core/i18n';
-import type { Theme } from '../core/theme';
+import type { Theme, ThemePalette, ThemeMode } from '../core/theme';
 
 export interface Router {
   navigateTo: (page: string, params?: Record<string, string>) => void;
@@ -21,6 +21,10 @@ export interface I18n {
 export interface ThemeManager {
   getTheme: () => Theme;
   setTheme: (theme: Theme) => void;
+  getPalette: () => ThemePalette;
+  getMode: () => ThemeMode;
+  setPalette: (palette: ThemePalette) => void;
+  setMode: (mode: ThemeMode) => void;
 }
 
 export interface PageConstructor {

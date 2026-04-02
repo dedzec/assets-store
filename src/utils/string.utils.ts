@@ -40,3 +40,31 @@ export function toKebabCase(text: string): string {
     .replace(/[\s_]+/g, '-')
     .toLowerCase();
 }
+
+/**
+ * Detects whether a link points to a local file or a cloud/online resource.
+ * Returns 'local' for file-system paths, 'cloud' for URLs, or '' if empty.
+ */
+export function detectLinkType(link: string): 'local' | 'cloud' | '' {
+  const trimmed = link.trim();
+  if (!trimmed) return '';
+
+  // Cloud patterns — URLs and protocol-based links
+  if (/^https?:\/\//i.test(trimmed)) return 'cloud';
+  if (/^ftp:\/\//i.test(trimmed)) return 'cloud';
+  if (/^s3:\/\//i.test(trimmed)) return 'cloud';
+
+  // Local patterns — absolute / relative file paths
+  if (trimmed.startsWith('/')) return 'local';
+  if (/^[A-Za-z]:[/\\]/.test(trimmed)) return 'local';
+  if (trimmed.startsWith('~')) return 'local';
+  if (trimmed.startsWith('\\\\')) return 'local';
+  if (/^file:\/\//i.test(trimmed)) return 'local';
+  if (trimmed.startsWith('./') || trimmed.startsWith('../')) return 'local';
+
+  // Domain-like pattern (e.g. drive.google.com/...) → cloud
+  if (/^[a-z0-9-]+\.[a-z]{2,}/i.test(trimmed)) return 'cloud';
+
+  // Default: treat as local path
+  return 'local';
+}

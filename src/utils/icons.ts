@@ -30,6 +30,9 @@ import {
   ExternalLink,
   Inbox,
   Heart,
+  Sun,
+  Moon,
+  Check,
   type IconNode,
   createElement,
 } from 'lucide';
@@ -92,4 +95,9 @@ export const icons = {
 
   // Misc
   heart: (size?: number) => iconHtml(Heart, size),
+
+  // Theme
+  sun: (size?: number) => iconHtml(Sun, size),
+  moon: (size?: number) => iconHtml(Moon, size),
+  check: (size?: number) => iconHtml(Check, size),
 } as const;

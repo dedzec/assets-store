@@ -1,5 +1,5 @@
 import { Asset } from '../types';
-import { escapeHtml, icons } from '../utils';
+import { escapeHtml, detectLinkType, icons } from '../utils';
 import { showAlert, toast } from '../components';
 
 export class FormPage {
@@ -59,6 +59,17 @@ export class FormPage {
         </div>
 
         <div class="form-group">
+          <label for="assetVersion">${i18n.t('form.fieldVersion')}</label>
+          <input 
+            type="text" 
+            id="assetVersion" 
+            placeholder="${i18n.t('form.fieldVersionPlaceholder')}" 
+            value="${escapeHtml(asset?.version || '')}"
+            maxlength="50"
+          />
+        </div>
+
+        <div class="form-group">
           <label for="assetImage">${i18n.t('form.fieldImage')}</label>
           <div class="file-input-wrapper">
             <input 
@@ -100,7 +111,12 @@ export class FormPage {
         </div>
 
         <div class="form-group">
-          <label for="assetLink">${i18n.t('form.fieldLink')}</label>
+          <label for="assetLink">
+            ${i18n.t('form.fieldLink')}
+            <span id="linkTypeBadge" class="link-type-badge ${asset?.linkType ? `link-type-badge--${asset.linkType}` : ''}" style="${asset?.linkType ? '' : 'display:none'}">
+              ${asset?.linkType === 'local' ? `${icons.hardDrive(14)} ${i18n.t('form.linkTypeLocal')}` : ''}${asset?.linkType === 'cloud' ? `${icons.globe(14)} ${i18n.t('form.linkTypeCloud')}` : ''}
+            </span>
+          </label>
           <textarea 
             id="assetLink" 
             placeholder="${i18n.t('form.fieldLinkPlaceholder')}"
@@ -144,10 +160,14 @@ export class FormPage {
     const selectImageBtn = document.getElementById('selectImageBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const dropZone = document.getElementById('dropZone');
+    const linkInput = document.getElementById('assetLink') as HTMLTextAreaElement;
 
     form.addEventListener('submit', (e) => this.handleSubmit(e));
     selectImageBtn?.addEventListener('click', () => this.handleSelectImage());
     cancelBtn?.addEventListener('click', () => window.router.navigateTo('list'));
+
+    // Auto-detect link type as user types
+    linkInput?.addEventListener('input', () => this.updateLinkTypeBadge(linkInput.value));
 
     // Drag & drop zone
     if (dropZone) {
@@ -167,6 +187,28 @@ export class FormPage {
         }
       });
     }
+  }
+
+  /** Update the link type badge based on current link value */
+  private updateLinkTypeBadge(linkValue: string): void {
+    const badge = document.getElementById('linkTypeBadge');
+    if (!badge) return;
+
+    const i18n = window.i18n;
+    const type = detectLinkType(linkValue);
+
+    if (!type) {
+      badge.style.display = 'none';
+      badge.className = 'link-type-badge';
+      badge.innerHTML = '';
+      return;
+    }
+
+    badge.style.display = '';
+    badge.className = `link-type-badge link-type-badge--${type}`;
+    badge.innerHTML = type === 'local'
+      ? `${icons.hardDrive(14)} ${i18n.t('form.linkTypeLocal')}`
+      : `${icons.globe(14)} ${i18n.t('form.linkTypeCloud')}`;
   }
 
   private async handleSelectImage(): Promise<void> {
@@ -228,17 +270,21 @@ export class FormPage {
     e.preventDefault();
 
     const titleInput = document.getElementById('assetTitle') as HTMLInputElement;
+    const versionInput = document.getElementById('assetVersion') as HTMLInputElement;
     const imageInput = document.getElementById('assetImage') as HTMLInputElement;
     const unityInput = document.getElementById('assetUnity') as HTMLTextAreaElement;
     const unrealInput = document.getElementById('assetUnreal') as HTMLTextAreaElement;
     const linkInput = document.getElementById('assetLink') as HTMLTextAreaElement;
 
+    const linkValue = linkInput.value.trim();
     const asset = {
       title: titleInput.value.trim(),
+      version: versionInput.value.trim(),
       image: imageInput.value.trim(),
       unity: unityInput.value.trim(),
       unreal: unrealInput.value.trim(),
-      link: linkInput.value.trim(),
+      link: linkValue,
+      linkType: detectLinkType(linkValue),
     };
 
     if (!asset.title) {
