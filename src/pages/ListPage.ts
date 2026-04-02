@@ -3,7 +3,7 @@
  * Displays and manages the list of assets with search functionality
  */
 
-import { Asset } from '../types';
+import { Asset, Category } from '../types';
 import { escapeHtml, truncate, icons } from '../utils';
 import { formatDate } from '../utils/date.utils';
 import { showConfirm, toast } from '../components';
@@ -11,14 +11,36 @@ import { showConfirm, toast } from '../components';
 export class ListPage {
   private container: HTMLElement;
   private allAssets: Asset[] = [];
+  private allCategories: Category[] = [];
+  private selectedCategoryId: number | null = null;
   private currentPage = 1;
   private readonly pageSize = 12;
+  /** Cache of categories per asset id */
+  private categoryCache: Map<number, Category[]> = new Map();
   constructor(container: HTMLElement) {
     this.container = container;
   }
 
   async render() {
     const i18n = window.i18n;
+
+    // Load categories for the filter bar
+    try {
+      this.allCategories = await window.api.getCategories();
+    } catch {
+      this.allCategories = [];
+    }
+
+    const categoryFilterHtml = this.allCategories.length > 0
+      ? `<div class="category-filter" id="categoryFilter">
+          <span class="category-filter__label">${icons.filter(14)} ${i18n.t('list.filterByCategory')}:</span>
+          <button class="category-filter__chip active" data-id="all">${i18n.t('list.filterAll')}</button>
+          ${this.allCategories.map(c => `
+            <button class="category-filter__chip" data-id="${c.id}" style="--chip-color: ${escapeHtml(c.color)}">${escapeHtml(c.name)}</button>
+          `).join('')}
+        </div>`
+      : '';
+
     this.container.innerHTML = `
       <div class="page-header">
         <h2>${icons.list(28)} ${i18n.t('list.title')}</h2>
@@ -35,6 +57,7 @@ export class ListPage {
           />
           <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
         </div>
+        ${categoryFilterHtml}
       </div>
       <div id="assetsList" class="assets-grid">
         ${this.renderSkeletons()}
@@ -43,6 +66,7 @@ export class ListPage {
 
     await this.loadAssets();
     this.attachSearchListeners();
+    this.attachFilterListeners();
   }
 
   /** Renders skeleton loading cards */
@@ -92,6 +116,27 @@ export class ListPage {
     }
   }
 
+  private attachFilterListeners() {
+    const filterContainer = document.getElementById('categoryFilter');
+    if (!filterContainer) return;
+
+    filterContainer.addEventListener('click', (e) => {
+      const chip = (e.target as HTMLElement).closest('.category-filter__chip') as HTMLElement | null;
+      if (!chip) return;
+
+      // Update active state
+      filterContainer.querySelectorAll('.category-filter__chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+
+      const idStr = chip.dataset.id;
+      this.selectedCategoryId = idStr === 'all' ? null : Number(idStr);
+      this.currentPage = 1;
+
+      const searchInput = document.getElementById('searchInput') as HTMLInputElement | null;
+      this.loadAssets(searchInput?.value || '');
+    });
+  }
+
   private async loadAssets(searchQuery = '') {
     const listContainer = document.getElementById('assetsList');
     if (!listContainer) return;
@@ -100,14 +145,37 @@ export class ListPage {
       // Load all assets only once
       if (this.allAssets.length === 0) {
         this.allAssets = await window.api.getAssets();
+
+        // Pre-load categories for all assets if filtering is enabled
+        if (this.allCategories.length > 0) {
+          await Promise.all(
+            this.allAssets.map(async (asset) => {
+              if (!this.categoryCache.has(asset.id)) {
+                try {
+                  const cats = await window.api.getAssetCategories(asset.id);
+                  this.categoryCache.set(asset.id, cats);
+                } catch { /* ignore */ }
+              }
+            })
+          );
+        }
       }
 
       // Filter assets based on search query
-      const filteredAssets = searchQuery 
+      let filteredAssets = searchQuery 
         ? this.allAssets.filter(asset => 
             asset.title.toLowerCase().includes(searchQuery.toLowerCase())
           )
-        : this.allAssets;
+        : [...this.allAssets];
+
+      // Filter by selected category
+      if (this.selectedCategoryId !== null) {
+        const catId = this.selectedCategoryId;
+        filteredAssets = filteredAssets.filter(asset => {
+          const cats = this.categoryCache.get(asset.id) ?? [];
+          return cats.some(c => c.id === catId);
+        });
+      }
 
       // Reset to page 1 on search
       if (searchQuery) {
@@ -155,7 +223,19 @@ export class ListPage {
               console.error('Error loading image for asset', asset.id, err);
             }
           }
-          return { ...asset, imageDataUrl };
+
+          // Load categories (use cache if available)
+          let categories: Category[] = [];
+          if (this.categoryCache.has(asset.id)) {
+            categories = this.categoryCache.get(asset.id) ?? [];
+          } else {
+            try {
+              categories = await window.api.getAssetCategories(asset.id);
+              this.categoryCache.set(asset.id, categories);
+            } catch { /* ignore */ }
+          }
+
+          return { ...asset, imageDataUrl, categories };
         })
       );
 
@@ -163,23 +243,33 @@ export class ListPage {
       const locale = i18n.getLocale();
       listContainer.innerHTML = assetsWithImages.map(asset => `
         <div class="asset-card" data-id="${asset.id}">
-          ${asset.imageDataUrl ? `
-            <div class="asset-image">
-              <img src="${asset.imageDataUrl}" alt="${escapeHtml(asset.title)}" />
+          <div class="asset-card__clickable" data-id="${asset.id}">
+            ${asset.imageDataUrl ? `
+              <div class="asset-image">
+                <img src="${asset.imageDataUrl}" alt="${escapeHtml(asset.title)}" />
+              </div>
+            ` : `
+              <div class="asset-image asset-image-placeholder">
+                <span>${icons.image(48)}</span>
+              </div>
+            `}
+            <div class="asset-content">
+              <h3>${escapeHtml(asset.title)}${asset.version ? `<span class="asset-version">v${escapeHtml(asset.version)}</span>` : ''}</h3>
+              ${asset.unity ? `<p class="asset-unity">${icons.gamepad(16)} Unity: <span title="${escapeHtml(asset.unity)}">${truncate(asset.unity, 40)}</span></p>` : ''}
+              ${asset.unreal ? `<p class="asset-unreal">${icons.target(16)} Unreal: <span title="${escapeHtml(asset.unreal)}">${truncate(asset.unreal, 40)}</span></p>` : ''}
+              ${asset.link ? `<p class="asset-link">${icons.link(16)} Link: <span title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</span>${asset.linkType ? `<span class="link-type-badge link-type-badge--${asset.linkType} link-type-badge--sm">${asset.linkType === 'local' ? icons.hardDrive(12) : icons.globe(12)}</span>` : ''}</p>` : ''}
+              <small class="asset-date">${i18n.t('list.createdAt')}: ${formatDate(asset.createdAt, locale)}</small>
+              ${asset.categories.length > 0 ? `
+                <div class="asset-categories">
+                  ${asset.categories.map(c => `<span class="category-badge" style="--chip-color: ${escapeHtml(c.color)}">${escapeHtml(c.name)}</span>`).join('')}
+                </div>
+              ` : ''}
             </div>
-          ` : `
-            <div class="asset-image asset-image-placeholder">
-              <span>${icons.image(48)}</span>
-            </div>
-          `}
-          <div class="asset-content">
-            <h3>${escapeHtml(asset.title)}${asset.version ? `<span class="asset-version">v${escapeHtml(asset.version)}</span>` : ''}</h3>
-            ${asset.unity ? `<p class="asset-unity">${icons.gamepad(16)} Unity: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unity)}" title="${escapeHtml(asset.unity)}">${truncate(asset.unity, 40)}</a></p>` : ''}
-            ${asset.unreal ? `<p class="asset-unreal">${icons.target(16)} Unreal: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.unreal)}" title="${escapeHtml(asset.unreal)}">${truncate(asset.unreal, 40)}</a></p>` : ''}
-            ${asset.link ? `<p class="asset-link">${icons.link(16)} Link: <a href="#" class="asset-link-btn" data-url="${escapeHtml(asset.link)}" title="${escapeHtml(asset.link)}">${truncate(asset.link, 40)}</a>${asset.linkType ? `<span class="link-type-badge link-type-badge--${asset.linkType} link-type-badge--sm">${asset.linkType === 'local' ? icons.hardDrive(12) : icons.globe(12)}</span>` : ''}</p>` : ''}
-            <small class="asset-date">${i18n.t('list.createdAt')}: ${formatDate(asset.createdAt, locale)}</small>
           </div>
           <div class="asset-actions">
+            <button class="btn-view" data-id="${asset.id}">
+              ${icons.eye(16)} ${i18n.t('list.view')}
+            </button>
             <button class="btn-edit" data-id="${asset.id}">
               ${icons.edit(16)} ${i18n.t('list.edit')}
             </button>
@@ -256,9 +346,30 @@ export class ListPage {
   }
 
   private attachEventListeners() {
+    const viewButtons = document.querySelectorAll('.btn-view');
     const editButtons = document.querySelectorAll('.btn-edit');
     const deleteButtons = document.querySelectorAll('.btn-delete');
-    const linkButtons = document.querySelectorAll('.asset-link-btn');
+    const clickableAreas = document.querySelectorAll('.asset-card__clickable');
+
+    clickableAreas.forEach(area => {
+      area.addEventListener('click', (e) => {
+        // Don't navigate if user clicked a link or button inside
+        if ((e.target as HTMLElement).closest('a, button')) return;
+        const id = (e.currentTarget as HTMLElement).dataset.id;
+        if (id) {
+          window.router.navigateTo('view', { id });
+        }
+      });
+    });
+
+    viewButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).dataset.id;
+        if (id) {
+          window.router.navigateTo('view', { id });
+        }
+      });
+    });
 
     editButtons.forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -273,16 +384,6 @@ export class ListPage {
       btn.addEventListener('click', async (e) => {
         const id = parseInt((e.currentTarget as HTMLElement).dataset.id || '0');
         await this.deleteAsset(id);
-      });
-    });
-
-    linkButtons.forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const url = (e.currentTarget as HTMLElement).dataset.url;
-        if (url) {
-          await window.api.openExternal(url);
-        }
       });
     });
   }
@@ -300,6 +401,7 @@ export class ListPage {
       await window.api.deleteAsset(id);
       // Reload all assets from database
       this.allAssets = [];
+      this.categoryCache.clear();
       this.currentPage = 1;
       await this.loadAssets();
     } catch (error) {

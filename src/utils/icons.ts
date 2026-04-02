@@ -33,6 +33,11 @@ import {
   Sun,
   Moon,
   Check,
+  Tag,
+  ArrowLeft,
+  Eye,
+  Filter,
+  Calendar,
   type IconNode,
   createElement,
 } from 'lucide';
@@ -100,4 +105,13 @@ export const icons = {
   sun: (size?: number) => iconHtml(Sun, size),
   moon: (size?: number) => iconHtml(Moon, size),
   check: (size?: number) => iconHtml(Check, size),
+
+  // Categories
+  tag: (size?: number) => iconHtml(Tag, size),
+
+  // Navigation / View
+  arrowLeft: (size?: number) => iconHtml(ArrowLeft, size),
+  eye: (size?: number) => iconHtml(Eye, size),
+  filter: (size?: number) => iconHtml(Filter, size),
+  calendar: (size?: number) => iconHtml(Calendar, size),
 } as const;

@@ -115,7 +115,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     if (document.querySelector('.modal-overlay')) return;
 
     const currentPage = router.getCurrentPage();
-    if (currentPage === 'form' || currentPage === 'settings') {
+    if (currentPage === 'form' || currentPage === 'view' || currentPage === 'settings' || currentPage === 'categories') {
       e.preventDefault();
       router.navigateTo('list');
     } else {

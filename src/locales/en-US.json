@@ -6,6 +6,7 @@
   "menu": {
     "list": "List",
     "form": "Add/Edit",
+    "categories": "Categories",
     "settings": "Settings",
     "close": "Close"
   },
@@ -23,7 +24,10 @@
     "createdAt": "Created at",
     "paginationOf": "of",
     "paginationPrev": "Previous",
-    "paginationNext": "Next"
+    "paginationNext": "Next",
+    "view": "View",
+    "filterByCategory": "Filter",
+    "filterAll": "All"
   },
   "form": {
     "titleAdd": "Add New Asset",
@@ -55,7 +59,11 @@
     "errorLoadImage": "Error loading image.",
     "notFound": "Asset not found.",
     "dropHint": "Or drag an image here",
-    "errorUnsupportedType": "Unsupported file type. Use JPG, PNG, GIF, SVG or WebP."
+    "errorUnsupportedType": "Unsupported file type. Use JPG, PNG, GIF, SVG or WebP.",
+    "fieldCategories": "Categories",
+    "fieldCategoriesPlaceholder": "Click to select categories",
+    "noCategoriesYet": "No categories created yet.",
+    "goToCategories": "Create categories"
   },
   "settings": {
     "title": "Settings",
@@ -116,6 +124,38 @@
       "description": "Assets Store is a professional asset manager developed with Electron, TypeScript and SQLite.",
       "madeWith": "Made with ❤️ using modern technologies."
     }
+  },
+  "view": {
+    "back": "Back to list",
+    "errorLoading": "Error loading asset details.",
+    "deleteSuccess": "Asset deleted successfully!"
+  },
+  "categories": {
+    "title": "Categories",
+    "subtitle": "Create and manage categories to organize your assets",
+    "addTitle": "Add Category",
+    "editTitle": "Edit Category",
+    "fieldName": "Name",
+    "fieldNamePlaceholder": "Category name",
+    "fieldColor": "Color",
+    "preview": "Preview",
+    "buttonAdd": "Add",
+    "buttonUpdate": "Update",
+    "buttonCancel": "Cancel",
+    "listTitle": "Your Categories",
+    "loading": "Loading categories...",
+    "empty": "No categories created yet.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this category? It will be removed from all assets.",
+    "required": "Please fill in the category name.",
+    "addSuccess": "Category added successfully!",
+    "updateSuccess": "Category updated successfully!",
+    "deleteSuccess": "Category deleted successfully!",
+    "duplicateError": "A category with this name already exists.",
+    "errorSave": "Error saving category. Please try again.",
+    "errorLoading": "Error loading categories.",
+    "errorDelete": "Error deleting category. Please try again."
   },
   "common": {
     "close": "Close",

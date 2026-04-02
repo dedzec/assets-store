@@ -19,12 +19,20 @@ export const IPC_CHANNELS = {
   MAXIMIZE_WINDOW: 'maximize-window',
   IS_MAXIMIZED: 'is-maximized',
   IMPORT_ASSETS: 'import-assets',
+  GET_CATEGORIES: 'get-categories',
+  ADD_CATEGORY: 'add-category',
+  UPDATE_CATEGORY: 'update-category',
+  DELETE_CATEGORY: 'delete-category',
+  GET_ASSET_CATEGORIES: 'get-asset-categories',
+  SET_ASSET_CATEGORIES: 'set-asset-categories',
 } as const;
 
 // Route Names
 export const ROUTES = {
   LIST: 'list',
   FORM: 'form',
+  VIEW: 'view',
+  CATEGORIES: 'categories',
   SETTINGS: 'settings',
 } as const;
 

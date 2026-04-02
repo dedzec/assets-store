@@ -3,7 +3,7 @@
  * Client-side routing system for navigation between pages
  */
 
-import { ListPage, FormPage, SettingsPage } from '../pages';
+import { ListPage, FormPage, ViewPage, CategoriesPage, SettingsPage } from '../pages';
 import type { PageConstructor } from '../types/core.types';
 
 export class Router {
@@ -21,6 +21,8 @@ export class Router {
     this.pages = new Map<string, PageConstructor>([
       ['list', ListPage as PageConstructor],
       ['form', FormPage as PageConstructor],
+      ['view', ViewPage as PageConstructor],
+      ['categories', CategoriesPage as PageConstructor],
       ['settings', SettingsPage as PageConstructor],
     ]);
   }
