@@ -81,7 +81,30 @@ function createDatabase(): Database.Database {
     console.log(`Backfilled linkType for ${orphans.length} existing asset(s).`);
   }
 
-  console.log('Database connected! Table "assets" is ready.');
+  // ─── Categories tables ───────────────────────────────────────────
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      color TEXT NOT NULL DEFAULT '#667eea',
+      createdAt TEXT DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS asset_categories (
+      assetId INTEGER NOT NULL,
+      categoryId INTEGER NOT NULL,
+      PRIMARY KEY (assetId, categoryId),
+      FOREIGN KEY (assetId) REFERENCES assets(id) ON DELETE CASCADE,
+      FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Enable foreign keys
+  db.pragma('foreign_keys = ON');
+
+  console.log('Database connected! Tables "assets", "categories" are ready.');
   return db;
 }
 

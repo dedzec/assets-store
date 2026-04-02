@@ -6,6 +6,9 @@
 // Asset Types
 export * from './asset.types';
 
+// Category Types
+export * from './category.types';
+
 // API Types
 export * from './api.types';
 

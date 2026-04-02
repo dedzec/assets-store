@@ -6,6 +6,7 @@
   "menu": {
     "list": "Listar",
     "form": "Adicionar/Editar",
+    "categories": "Categorias",
     "settings": "Configurações",
     "close": "Fechar"
   },
@@ -23,7 +24,10 @@
     "createdAt": "Criado em",
     "paginationOf": "de",
     "paginationPrev": "Anterior",
-    "paginationNext": "Próximo"
+    "paginationNext": "Próximo",
+    "view": "Visualizar",
+    "filterByCategory": "Filtrar",
+    "filterAll": "Todos"
   },
   "form": {
     "titleAdd": "Adicionar Novo Ativo",
@@ -55,7 +59,11 @@
     "errorLoadImage": "Erro ao carregar a imagem.",
     "notFound": "Ativo não encontrado.",
     "dropHint": "Ou arraste uma imagem aqui",
-    "errorUnsupportedType": "Tipo de arquivo não suportado. Use JPG, PNG, GIF, SVG ou WebP."
+    "errorUnsupportedType": "Tipo de arquivo não suportado. Use JPG, PNG, GIF, SVG ou WebP.",
+    "fieldCategories": "Categorias",
+    "fieldCategoriesPlaceholder": "Clique para selecionar categorias",
+    "noCategoriesYet": "Nenhuma categoria criada ainda.",
+    "goToCategories": "Criar categorias"
   },
   "settings": {
     "title": "Configurações",
@@ -116,6 +124,38 @@
       "description": "Assets Store é um gerenciador profissional de ativos desenvolvido com Electron, TypeScript e SQLite.",
       "madeWith": "Desenvolvido com ❤️ usando tecnologias modernas."
     }
+  },
+  "view": {
+    "back": "Voltar para lista",
+    "errorLoading": "Erro ao carregar detalhes do ativo.",
+    "deleteSuccess": "Ativo excluído com sucesso!"
+  },
+  "categories": {
+    "title": "Categorias",
+    "subtitle": "Crie e gerencie categorias para organizar seus ativos",
+    "addTitle": "Adicionar Categoria",
+    "editTitle": "Editar Categoria",
+    "fieldName": "Nome",
+    "fieldNamePlaceholder": "Nome da categoria",
+    "fieldColor": "Cor",
+    "preview": "Prévia",
+    "buttonAdd": "Adicionar",
+    "buttonUpdate": "Atualizar",
+    "buttonCancel": "Cancelar",
+    "listTitle": "Suas Categorias",
+    "loading": "Carregando categorias...",
+    "empty": "Nenhuma categoria criada ainda.",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "deleteConfirm": "Tem certeza que deseja excluir esta categoria? Ela será removida de todos os ativos.",
+    "required": "Por favor, preencha o nome da categoria.",
+    "addSuccess": "Categoria adicionada com sucesso!",
+    "updateSuccess": "Categoria atualizada com sucesso!",
+    "deleteSuccess": "Categoria excluída com sucesso!",
+    "duplicateError": "Já existe uma categoria com este nome.",
+    "errorSave": "Erro ao salvar categoria. Tente novamente.",
+    "errorLoading": "Erro ao carregar categorias.",
+    "errorDelete": "Erro ao excluir categoria. Tente novamente."
   },
   "common": {
     "close": "Fechar",

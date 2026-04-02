@@ -1,10 +1,11 @@
-import { Asset } from '../types';
+import { Asset, Category } from '../types';
 import { escapeHtml, detectLinkType, icons } from '../utils';
 import { showAlert, toast } from '../components';
 
 export class FormPage {
   private container: HTMLElement;
   private editingId: number | null = null;
+  private selectedCategoryIds: Set<number> = new Set();
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -23,6 +24,20 @@ export class FormPage {
   private async renderForm(asset?: Asset): Promise<void> {
     const isEdit = !!asset;
     const i18n = window.i18n;
+
+    // Load categories and current asset categories in parallel
+    let allCategories: Category[] = [];
+    try {
+      allCategories = await window.api.getCategories();
+    } catch { /* ignore */ }
+
+    this.selectedCategoryIds.clear();
+    if (asset) {
+      try {
+        const assetCats = await window.api.getAssetCategories(asset.id);
+        assetCats.forEach(c => this.selectedCategoryIds.add(c.id));
+      } catch { /* ignore */ }
+    }
     
     // Load image preview if editing and has image
     let imagePreviewHtml = '';
@@ -36,6 +51,22 @@ export class FormPage {
         `;
       }
     }
+
+    const categoryChipsHtml = allCategories.length > 0
+      ? `<div class="category-chips" id="categoryChips">
+          ${allCategories.map(cat => `
+            <button
+              type="button"
+              class="category-chip${this.selectedCategoryIds.has(cat.id) ? ' active' : ''}"
+              data-id="${cat.id}"
+              style="--chip-color: ${escapeHtml(cat.color)}"
+            >${escapeHtml(cat.name)}</button>
+          `).join('')}
+        </div>`
+      : `<p class="text-muted category-chips-empty">
+          ${i18n.t('form.noCategoriesYet')}
+          <a href="#" id="goToCategoriesLink">${i18n.t('form.goToCategories')}</a>
+        </p>`;
     
     this.container.innerHTML = `
       <div class="page-header">
@@ -124,6 +155,12 @@ export class FormPage {
           >${escapeHtml(asset?.link || '')}</textarea>
         </div>
 
+        <div class="form-group">
+          <label>${icons.tag(16)} ${i18n.t('form.fieldCategories')}</label>
+          <p class="form-hint">${i18n.t('form.fieldCategoriesPlaceholder')}</p>
+          ${categoryChipsHtml}
+        </div>
+
         <div class="form-actions">
           <button type="submit" class="btn-primary">
             ${isEdit ? `${icons.save(16)} ${i18n.t('form.buttonUpdate')}` : `${icons.plus(16)} ${i18n.t('form.buttonAdd')}`}
@@ -168,6 +205,28 @@ export class FormPage {
 
     // Auto-detect link type as user types
     linkInput?.addEventListener('input', () => this.updateLinkTypeBadge(linkInput.value));
+
+    // Category chips toggle
+    const categoryChips = document.getElementById('categoryChips');
+    categoryChips?.addEventListener('click', (e) => {
+      const chip = (e.target as HTMLElement).closest('.category-chip') as HTMLElement | null;
+      if (!chip) return;
+      const id = Number(chip.dataset.id);
+      if (this.selectedCategoryIds.has(id)) {
+        this.selectedCategoryIds.delete(id);
+        chip.classList.remove('active');
+      } else {
+        this.selectedCategoryIds.add(id);
+        chip.classList.add('active');
+      }
+    });
+
+    // "Go to categories" link when no categories exist
+    const goToCategoriesLink = document.getElementById('goToCategoriesLink');
+    goToCategoriesLink?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.router.navigateTo('categories');
+    });
 
     // Drag & drop zone
     if (dropZone) {
@@ -293,11 +352,17 @@ export class FormPage {
     }
 
     try {
+      let savedId: number;
       if (this.editingId) {
         await window.api.updateAsset({ id: this.editingId, ...asset });
+        savedId = this.editingId;
       } else {
-        await window.api.addAsset(asset);
+        const created = await window.api.addAsset(asset);
+        savedId = created.id;
       }
+
+      // Save selected categories
+      await window.api.setAssetCategories(savedId, [...this.selectedCategoryIds]);
       
       window.router.navigateTo('list');
     } catch (error) {

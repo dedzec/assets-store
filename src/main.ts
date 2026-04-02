@@ -13,6 +13,7 @@ import { getDb, getImagesDir } from './core/database';
 import { APP_CONFIG } from './config/app.config';
 import { IPC_CHANNELS } from './config/constants';
 import type { AssetInput, AssetUpdate } from './types/asset.types';
+import type { CategoryInput, CategoryUpdate } from './types/category.types';
 
 // Configure electron-log
 log.initialize();
@@ -206,6 +207,66 @@ function registerIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.MINIMIZE_WINDOW, () => {
     mainWindow?.minimize();
+  });
+
+  // ─── Categories ────────────────────────────────────────────────────
+
+  ipcMain.handle(IPC_CHANNELS.GET_CATEGORIES, () => {
+    return db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.ADD_CATEGORY, (_, category: unknown) => {
+    if (!category || typeof category !== 'object') throw new Error('Invalid category data');
+    const c = category as Record<string, unknown>;
+    if (typeof c.name !== 'string' || !c.name.trim()) throw new Error('Category name is required');
+    const color = (typeof c.color === 'string' && c.color) ? c.color : '#667eea';
+
+    const result = db.prepare('INSERT INTO categories (name, color) VALUES (?, ?)').run(c.name.trim(), color);
+    return { id: result.lastInsertRowid, name: c.name.trim(), color };
+  });
+
+  ipcMain.handle(IPC_CHANNELS.UPDATE_CATEGORY, (_, category: unknown) => {
+    if (!category || typeof category !== 'object') throw new Error('Invalid category data');
+    const c = category as Record<string, unknown>;
+    if (typeof c.id !== 'number' || c.id <= 0) throw new Error('Invalid category id');
+    if (typeof c.name !== 'string' || !c.name.trim()) throw new Error('Category name is required');
+    const color = (typeof c.color === 'string' && c.color) ? c.color : '#667eea';
+
+    const result = db.prepare('UPDATE categories SET name = ?, color = ? WHERE id = ?').run(c.name.trim(), color, c.id);
+    return { changes: result.changes };
+  });
+
+  ipcMain.handle(IPC_CHANNELS.DELETE_CATEGORY, (_, id: number) => {
+    if (typeof id !== 'number' || id <= 0) throw new Error('Invalid category id');
+    // Junction rows are removed automatically via ON DELETE CASCADE
+    const result = db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+    return { changes: result.changes };
+  });
+
+  ipcMain.handle(IPC_CHANNELS.GET_ASSET_CATEGORIES, (_, assetId: number) => {
+    if (typeof assetId !== 'number' || assetId <= 0) throw new Error('Invalid asset id');
+    return db.prepare(`
+      SELECT c.* FROM categories c
+      INNER JOIN asset_categories ac ON ac.categoryId = c.id
+      WHERE ac.assetId = ?
+      ORDER BY c.name ASC
+    `).all(assetId);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.SET_ASSET_CATEGORIES, (_, assetId: number, categoryIds: unknown) => {
+    if (typeof assetId !== 'number' || assetId <= 0) throw new Error('Invalid asset id');
+    if (!Array.isArray(categoryIds)) throw new Error('Invalid category ids');
+
+    const validIds = categoryIds.filter((id): id is number => typeof id === 'number' && id > 0);
+
+    const setCategories = db.transaction((aId: number, cIds: number[]) => {
+      db.prepare('DELETE FROM asset_categories WHERE assetId = ?').run(aId);
+      const insert = db.prepare('INSERT OR IGNORE INTO asset_categories (assetId, categoryId) VALUES (?, ?)');
+      for (const cId of cIds) {
+        insert.run(aId, cId);
+      }
+    });
+    setCategories(assetId, validIds);
   });
 
   ipcMain.handle(IPC_CHANNELS.MAXIMIZE_WINDOW, () => {

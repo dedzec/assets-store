@@ -4,6 +4,7 @@
  */
 
 import { Asset, AssetInput, AssetUpdate } from './asset.types';
+import { Category, CategoryInput, CategoryUpdate } from './category.types';
 
 export interface ElectronAPI {
   getAssets: () => Promise<Asset[]>;
@@ -20,4 +21,11 @@ export interface ElectronAPI {
   readImage: (imagePath: string) => Promise<string | null>;
   openExternal: (url: string) => Promise<boolean>;
   importAssets: (assets: AssetInput[]) => Promise<{ imported: number }>;
+  // Categories
+  getCategories: () => Promise<Category[]>;
+  addCategory: (category: CategoryInput) => Promise<Category>;
+  updateCategory: (category: CategoryUpdate) => Promise<{ changes: number }>;
+  deleteCategory: (id: number) => Promise<{ changes: number }>;
+  getAssetCategories: (assetId: number) => Promise<Category[]>;
+  setAssetCategories: (assetId: number, categoryIds: number[]) => Promise<void>;
 }
