@@ -11,6 +11,9 @@ const PRESET_COLORS = [
   '#667eea', '#4facfe', '#00b4db', '#11998e',
   '#f2994a', '#ee5a6f', '#9c27b0', '#e91e63',
   '#ff5722', '#795548', '#607d8b', '#3f51b5',
+  '#00bcd4', '#8bc34a', '#ffc107', '#ff9800',
+  '#e040fb', '#7c4dff', '#18ffff', '#69f0ae',
+  '#ff6e40', '#d4e157', '#26a69a', '#ab47bc',
 ];
 
 export class CategoriesPage {

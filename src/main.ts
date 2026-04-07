@@ -13,7 +13,6 @@ import { getDb, getImagesDir } from './core/database';
 import { APP_CONFIG } from './config/app.config';
 import { IPC_CHANNELS } from './config/constants';
 import type { AssetInput, AssetUpdate } from './types/asset.types';
-import type { CategoryInput, CategoryUpdate } from './types/category.types';
 
 // Configure electron-log
 log.initialize();
@@ -314,6 +313,22 @@ function registerIpcHandlers(): void {
     const imported = importMany(assets);
     return { imported };
   });
+
+  // ─── Settings ───────────────────────────────────────────────────────
+
+  ipcMain.handle(IPC_CHANNELS.GET_SETTINGS, () => {
+    const rows = db.prepare('SELECT key, value FROM settings').all() as Array<{ key: string; value: string }>;
+    const settings: Record<string, string> = {};
+    for (const row of rows) settings[row.key] = row.value;
+    return settings;
+  });
+
+  ipcMain.handle(IPC_CHANNELS.SET_SETTING, (_, key: string, value: string) => {
+    if (typeof key !== 'string' || typeof value !== 'string') {
+      throw new Error('Invalid setting: key and value must be strings');
+    }
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value);
+  });
 }
 
 // ─── Window management ───────────────────────────────────────────────
@@ -326,9 +341,18 @@ const createWindow = (): void => {
     minHeight: APP_CONFIG.window.minHeight,
     frame: false,
     titleBarStyle: 'hidden',
+    // Evita flash branco: janela fica invisível até estar pronta
+    show: false,
+    backgroundColor: '#f5f5f5',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
+  });
+
+  // Exibe a janela somente quando o conteúdo estiver totalmente renderizado
+  const win = mainWindow;
+  win.once('ready-to-show', () => {
+    win.show();
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -339,8 +363,10 @@ const createWindow = (): void => {
     );
   }
 
-  // Open DevTools in development
-  mainWindow.webContents.openDevTools();
+  // Open DevTools in development only
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.webContents.openDevTools();
+  }
 };
 
 // ─── App lifecycle ───────────────────────────────────────────────────

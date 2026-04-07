@@ -10,11 +10,10 @@ import fs from 'node:fs';
 import { APP_CONFIG } from '../config/app.config';
 import { detectLinkType } from '../utils/string.utils';
 
-// Use project directory instead of userData
-const isDev = process.env.NODE_ENV !== 'production';
-const dbDir = isDev
-  ? path.join(process.cwd(), APP_CONFIG.database.directory)
-  : path.join(path.dirname(app.getPath('exe')), APP_CONFIG.database.directory);
+// Use project directory in dev, userData in production
+const dbDir = app.isPackaged
+  ? path.join(app.getPath('userData'), APP_CONFIG.database.directory)
+  : path.join(process.cwd(), APP_CONFIG.database.directory);
 
 // Ensure directory and images subdirectory exist
 if (!fs.existsSync(dbDir)) {
@@ -101,10 +100,18 @@ function createDatabase(): Database.Database {
     )
   `);
 
+  // ─── Settings table ─────────────────────────────────────────────
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `);
+
   // Enable foreign keys
   db.pragma('foreign_keys = ON');
 
-  console.log('Database connected! Tables "assets", "categories" are ready.');
+  console.log('Database connected! Tables "assets", "categories", "settings" are ready.');
   return db;
 }
 

@@ -1,7 +1,7 @@
 import { STORAGE_KEYS } from '../config/constants';
 
 // ── Palette & Mode Types ──────────────────────────────────────────────
-export const THEME_PALETTES = ['purple', 'blue', 'ocean', 'forest', 'sunset', 'rose'] as const;
+export const THEME_PALETTES = ['purple', 'blue', 'ocean', 'forest', 'sunset', 'rose', 'cherry', 'lavender', 'gold', 'slate'] as const;
 export type ThemePalette = typeof THEME_PALETTES[number];
 export type ThemeMode = 'light' | 'dark';
 export type Theme = `${ThemePalette}-${ThemeMode}`;
@@ -177,16 +177,124 @@ const THEME_CONFIGS: Record<Theme, ThemeVars> = {
     '--hover-bg': '#301820',
     '--shadow': 'rgba(0, 0, 0, 0.5)',
   },
+
+  // ─── Cherry (Deep Red) ───
+  'cherry-light': {
+    '--primary-gradient-start': '#d32f2f',
+    '--primary-gradient-end': '#ff6659',
+    '--bg-color': '#fdf5f5',
+    '--card-bg': '#ffffff',
+    '--text-primary': '#3b1515',
+    '--text-secondary': '#6b3030',
+    '--text-muted': '#a06060',
+    '--border-color': '#e8c8c8',
+    '--hover-bg': '#f8e8e8',
+    '--shadow': 'rgba(0, 0, 0, 0.08)',
+  },
+  'cherry-dark': {
+    '--primary-gradient-start': '#ef5350',
+    '--primary-gradient-end': '#ff8a80',
+    '--bg-color': '#1a0a0a',
+    '--card-bg': '#2a1515',
+    '--text-primary': '#f4d0d0',
+    '--text-secondary': '#c47a7a',
+    '--text-muted': '#944a4a',
+    '--border-color': '#3a1a1a',
+    '--hover-bg': '#301515',
+    '--shadow': 'rgba(0, 0, 0, 0.5)',
+  },
+
+  // ─── Lavender (Soft Violet) ───
+  'lavender-light': {
+    '--primary-gradient-start': '#b388ff',
+    '--primary-gradient-end': '#7c4dff',
+    '--bg-color': '#f8f5ff',
+    '--card-bg': '#ffffff',
+    '--text-primary': '#2a1a40',
+    '--text-secondary': '#5a4070',
+    '--text-muted': '#8a70a0',
+    '--border-color': '#dcd0ea',
+    '--hover-bg': '#f0e8f8',
+    '--shadow': 'rgba(0, 0, 0, 0.08)',
+  },
+  'lavender-dark': {
+    '--primary-gradient-start': '#ce93d8',
+    '--primary-gradient-end': '#ab47bc',
+    '--bg-color': '#140e1a',
+    '--card-bg': '#221a2e',
+    '--text-primary': '#e8d8f0',
+    '--text-secondary': '#a888c0',
+    '--text-muted': '#785898',
+    '--border-color': '#322440',
+    '--hover-bg': '#2a1e38',
+    '--shadow': 'rgba(0, 0, 0, 0.5)',
+  },
+
+  // ─── Gold (Amber / Yellow) ───
+  'gold-light': {
+    '--primary-gradient-start': '#ffc107',
+    '--primary-gradient-end': '#ff8f00',
+    '--bg-color': '#fffdf5',
+    '--card-bg': '#ffffff',
+    '--text-primary': '#3a3010',
+    '--text-secondary': '#6a5520',
+    '--text-muted': '#a08840',
+    '--border-color': '#eae0c0',
+    '--hover-bg': '#f8f2e0',
+    '--shadow': 'rgba(0, 0, 0, 0.08)',
+  },
+  'gold-dark': {
+    '--primary-gradient-start': '#ffd54f',
+    '--primary-gradient-end': '#ffab00',
+    '--bg-color': '#1a1508',
+    '--card-bg': '#2a2210',
+    '--text-primary': '#f4ecd0',
+    '--text-secondary': '#c4a870',
+    '--text-muted': '#947840',
+    '--border-color': '#3a2e18',
+    '--hover-bg': '#302815',
+    '--shadow': 'rgba(0, 0, 0, 0.5)',
+  },
+
+  // ─── Slate (Cool Gray) ───
+  'slate-light': {
+    '--primary-gradient-start': '#546e7a',
+    '--primary-gradient-end': '#78909c',
+    '--bg-color': '#f5f7f8',
+    '--card-bg': '#ffffff',
+    '--text-primary': '#1a2830',
+    '--text-secondary': '#3d5060',
+    '--text-muted': '#708898',
+    '--border-color': '#cdd8de',
+    '--hover-bg': '#e8eef0',
+    '--shadow': 'rgba(0, 0, 0, 0.08)',
+  },
+  'slate-dark': {
+    '--primary-gradient-start': '#78909c',
+    '--primary-gradient-end': '#90a4ae',
+    '--bg-color': '#0e1418',
+    '--card-bg': '#1a2530',
+    '--text-primary': '#d8e4ea',
+    '--text-secondary': '#8aa0b0',
+    '--text-muted': '#5a7888',
+    '--border-color': '#243540',
+    '--hover-bg': '#1e3040',
+    '--shadow': 'rgba(0, 0, 0, 0.5)',
+  },
 };
 
 // ── Palette Preview Colors (used by the selector UI) ──────────────────
 export const PALETTE_COLORS: Record<ThemePalette, [string, string]> = {
-  purple: ['#667eea', '#764ba2'],
-  blue:   ['#4facfe', '#00f2fe'],
-  ocean:  ['#00b4db', '#0083b0'],
-  forest: ['#11998e', '#38ef7d'],
-  sunset: ['#f2994a', '#f2c94c'],
-  rose:   ['#ee5a6f', '#f093a0'],
+  purple:   ['#667eea', '#764ba2'],
+  blue:     ['#4facfe', '#00f2fe'],
+  ocean:    ['#00b4db', '#0083b0'],
+  forest:   ['#11998e', '#38ef7d'],
+  sunset:   ['#f2994a', '#f2c94c'],
+  rose:     ['#ee5a6f', '#f093a0'],
+  cherry:   ['#d32f2f', '#ff6659'],
+  lavender: ['#b388ff', '#7c4dff'],
+  gold:     ['#ffc107', '#ff8f00'],
+  slate:    ['#546e7a', '#78909c'],
 };
 
 // ── Migration map for old theme IDs ───────────────────────────────────
@@ -207,23 +315,33 @@ export class ThemeManager {
   private readonly STORAGE_KEY = STORAGE_KEYS.THEME;
 
   constructor() {
-    this.currentTheme = this.loadTheme();
-    this.applyTheme(this.currentTheme);
+    // Default theme — real value loaded via init()
+    this.currentTheme = 'purple-light';
   }
 
-  private loadTheme(): Theme {
-    const saved = localStorage.getItem(this.STORAGE_KEY) ?? '';
-    // Migrate legacy values
-    if (LEGACY_MAP[saved]) {
-      const migrated = LEGACY_MAP[saved];
-      this.saveTheme(migrated);
-      return migrated;
+  /** Initialize with persisted theme from main process; migrates localStorage on first run */
+  init(savedTheme?: string): void {
+    const raw = savedTheme ?? localStorage.getItem(this.STORAGE_KEY) ?? '';
+    let theme: Theme = 'purple-light';
+
+    if (LEGACY_MAP[raw]) {
+      theme = LEGACY_MAP[raw];
+    } else if (isValidTheme(raw)) {
+      theme = raw;
     }
-    return isValidTheme(saved) ? saved : 'purple-light';
+
+    // Migrate from localStorage → SQLite on first run
+    if (!savedTheme && raw) {
+      this.saveTheme(theme);
+      localStorage.removeItem(this.STORAGE_KEY);
+    }
+
+    this.currentTheme = theme;
+    this.applyTheme(theme);
   }
 
   private saveTheme(theme: Theme): void {
-    localStorage.setItem(this.STORAGE_KEY, theme);
+    window.api?.setSetting(this.STORAGE_KEY, theme);
   }
 
   // ── Public API ────────────────────────────────────────────────────

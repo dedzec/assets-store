@@ -28,6 +28,9 @@ export const api = {
   deleteCategory: (id: number) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_CATEGORY, id),
   getAssetCategories: (assetId: number) => ipcRenderer.invoke(IPC_CHANNELS.GET_ASSET_CATEGORIES, assetId),
   setAssetCategories: (assetId: number, categoryIds: number[]) => ipcRenderer.invoke(IPC_CHANNELS.SET_ASSET_CATEGORIES, assetId, categoryIds),
+  // Settings
+  getSettings: () => ipcRenderer.invoke(IPC_CHANNELS.GET_SETTINGS),
+  setSetting: (key: string, value: string) => ipcRenderer.invoke(IPC_CHANNELS.SET_SETTING, key, value),
 };
 
 contextBridge.exposeInMainWorld('api', api);

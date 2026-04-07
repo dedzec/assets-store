@@ -9,11 +9,8 @@ import { i18n } from './core/i18n';
 import { themeManager } from './core/theme';
 import { showConfirm } from './components';
 import { icons } from './utils';
+import { STORAGE_KEYS } from './config/constants';
 import './types';
-
-// Initialize theme and i18n
-themeManager.getTheme(); // Apply saved theme
-i18n.getLocale(); // Load saved locale
 
 // Inject sidebar Lucide icons
 function injectSidebarIcons(): void {
@@ -42,8 +39,16 @@ function updateI18nTexts(): void {
   });
 }
 
-// Initialize router
-const router = new Router('mainContent');
+// ── Async initialization ─────────────────────────────────────────────────────
+
+async function initApp(): Promise<void> {
+  // Load persisted settings from main process (SQLite)
+  const settings = await window.api.getSettings();
+  themeManager.init(settings[STORAGE_KEYS.THEME]);
+  i18n.init(settings[STORAGE_KEYS.LOCALE]);
+
+  // Initialize router
+  const router = new Router('mainContent');
 
 // Make router, i18n, and theme available globally
 window.router = router;
@@ -132,8 +137,11 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
   }
 });
 
-// Load initial page
-router.navigateTo('list');
+  // Load initial page
+  router.navigateTo('list');
 
-console.log('Assets Store - Application loaded successfully!');
+  console.log('Assets Store - Application loaded successfully!');
+}
+
+initApp();
 

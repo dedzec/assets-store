@@ -37,11 +37,12 @@
 
 - 🎨 **Professional UI** - Clean, modern interface with sidebar navigation
 - 🌍 **Multilingual** - Full support for Portuguese (pt-BR) and English (en-US)
-- 🎨 **Themeable** - Three beautiful themes (Default/Purple, Light/Blue, Dark/Purple)
+- 🎨 **Themeable** - 10 palettes × 2 modes (light/dark) = 20 combinations
 - 🔒 **Secure** - Proper IPC communication with contextBridge
 - 📦 **Type-Safe** - 100% TypeScript with strict mode
 - ⚡ **Fast** - Vite bundler + better-sqlite3 sync API
 - 🧪 **Tested** - Vitest unit tests for utilities
+- 💾 **Persistent Settings** - Theme, mode, and language saved in SQLite
 
 ---
 
@@ -55,18 +56,20 @@
 | 🔍 **Real-time Search** | Instantly filter assets by title as you type |
 | 🖼️ **Image Preview** | Upload and preview images using secure base64 encoding |
 | 🔗 **Clickable URLs** | Unity, Unreal Engine, and general links open in external browser |
-| 💾 **Local Storage** | SQLite database stored locally in project directory |
+| 💾 **Local Storage** | SQLite database in `~/.config/assets-store/` (production) or `data/` (dev) |
 | 📊 **Asset Listing** | Paginated view with asset cards showing all details |
 | ✏️ **Easy Editing** | Double-click any asset to edit its details |
 | 🗑️ **Safe Deletion** | Confirmation dialog before deleting assets |
 | 📥 **Import / Export** | Import and export assets as JSON files |
 | 🖱️ **Drag & Drop** | Drag images directly onto the form to upload |
+| 🏷️ **Categories** | Create and assign color-coded categories to assets |
 
 ### User Experience
 
 | Feature | Description |
 |---------|-------------|
-| 🎨 **Theme System** | Choose from 3 pre-configured themes |
+| 🎨 **Theme System** | 10 palettes (purple, blue, ocean, forest, sunset, rose, cherry, lavender, gold, slate) × light/dark |
+| 💾 **Persistent Preferences** | Theme, mode, and language stored in SQLite — survive app restarts |
 | 🌐 **i18n Support** | Switch between Portuguese and English seamlessly |
 | 📱 **Responsive** | Adapts to different window sizes (min: 800x600) |
 | 🎯 **Intuitive Navigation** | Sidebar menu for quick page switching |
@@ -238,11 +241,14 @@ This will:
 |--------|---------|-------------|
 | **Start** | `npm run start` | Run in development mode |
 | **Package** | `npm run package` | Package app for current platform |
-| **Make** | `npm run make` | Create distributable installers |
+| **Make** | `npm run make` | Create distributable installers (DEB + ZIP) |
 | **Publish** | `npm run publish` | Publish to distribution channels |
 | **Lint** | `npm run lint` | Run ESLint on TypeScript files |
 | **Test** | `npm run test` | Run unit tests with Vitest |
 | **Test Watch** | `npm run test:watch` | Run tests in watch mode |
+| **Make TAR** | `npm run make:tar` | Package + create `.tar.gz` archive |
+| **Make PKG** | `npm run make:pkg` | Package + create Arch `.pkg.tar.zst` |
+| **Install Arch** | `npm run install:arch` | Package + build + install on Arch Linux |
 
 ### Keyboard Shortcuts
 
@@ -320,35 +326,60 @@ export const IPC_CHANNELS = {
 
 ---
 
-## �️ Database Schema
+## 🗄️ Database Schema
 
 ### Assets Table
 
 ```sql
 CREATE TABLE assets (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT NOT NULL,              -- Asset title
-  image TEXT,                        -- Image path or base64
-  unity TEXT,                        -- Unity asset URL
-  unreal TEXT,                       -- Unreal Engine asset URL
-  link TEXT,                         -- General web link
+  title TEXT NOT NULL,
+  image TEXT,
+  version TEXT DEFAULT '',
+  unity TEXT,
+  unreal TEXT,
+  link TEXT,
+  linkType TEXT DEFAULT '',          -- 'local' | 'cloud' | ''
   createdAt TEXT DEFAULT (datetime('now', 'localtime'))
 );
 ```
 
-### TypeScript Types
+### Categories Tables
 
-```typescript
-interface Asset {
-  id: number;
-  title: string;
-  image: string;
-  unity: string;
-  unreal: string;
-  link: string;
-  createdAt: string;
-}
+```sql
+CREATE TABLE categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  color TEXT NOT NULL DEFAULT '#667eea',
+  createdAt TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE asset_categories (
+  assetId INTEGER NOT NULL,
+  categoryId INTEGER NOT NULL,
+  PRIMARY KEY (assetId, categoryId),
+  FOREIGN KEY (assetId) REFERENCES assets(id) ON DELETE CASCADE,
+  FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE CASCADE
+);
 ```
+
+### Settings Table
+
+```sql
+CREATE TABLE settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+```
+
+Stores persistent user preferences. Keys: `assetsstore-theme`, `assetsstore-locale`.
+
+### Database Location
+
+| Environment | Path |
+|-------------|------|
+| Development | `./data/database.sqlite` (project root) |
+| Production | `~/.config/assets-store/data/database.sqlite` |
 
 ---
 
@@ -479,6 +510,19 @@ this.pages = new Map<string, PageConstructor>([
 
 ## 📦 Build & Distribution
 
+### Application Icons
+
+All icons are ready in `src/assets/` and configured in `forge.config.ts`:
+
+| Platform | File                   | Details                   |
+|----------|------------------------|---------------------------|
+| Linux    | `src/assets/icon.png`  | 1024×1024 RGBA            |
+| Windows  | `src/assets/icon.ico`  | 7 resolutions (16–256 px) |
+| macOS    | `src/assets/icon.icns` | 7 Retina variants         |
+
+Icons were generated with **Icon Forge** (`~/Documents/icon-forge/`), a custom
+Python CLI built for this project. To regenerate or update icons, see [`docs/icons.md`](docs/icons.md).
+
 ### Package for Current Platform
 
 ```bash
@@ -496,7 +540,7 @@ npm run make
 Supported makers (configured in `forge.config.ts`):
 - **Windows**: Squirrel (`.exe` installer)
 - **macOS**: ZIP (`.app` bundle)
-- **Linux**: DEB (`.deb` package) and RPM (`.rpm` package)
+- **Linux**: DEB (`.deb` package)
 
 Output: `out/make/`
 
@@ -506,8 +550,38 @@ Output: `out/make/`
 |----------|--------|
 | Windows | `Assets Store Setup.exe` |
 | macOS | `Assets Store.app.zip` |
-| Linux (Debian) | `assets-store_1.0.0_amd64.deb` |
-| Linux (RedHat) | `assets-store-1.0.0-1.x86_64.rpm` |
+| Linux (Debian/Ubuntu) | `assets-store_1.0.0_amd64.deb` |
+| Linux (Portable) | `out/make/tar/x64/assets-store-linux-x64-1.0.0.tar.gz` |
+| Linux (Arch) | `assets-store-1.0.0-1-x86_64.pkg.tar.zst` |
+
+### Arch Linux
+
+Native Arch packaging via `makepkg` + `PKGBUILD`. A single command builds, packages, and installs:
+
+```bash
+./scripts/install-arch.sh
+# or
+npm run install:arch
+```
+
+What it does:
+1. `npm run package` — Electron Forge packages the app
+2. `makepkg -sf` — creates `.pkg.tar.zst` from `PKGBUILD`
+3. `sudo pacman -U` — installs via pacman
+
+After install, run:
+```bash
+assets-store --no-sandbox
+```
+
+Files installed to:
+- `/opt/assets-store/` — app binaries
+- `/usr/bin/assets-store` — symlink
+- `/usr/share/applications/assets-store.desktop` — launcher entry
+- `/usr/share/pixmaps/assets-store.png` — icon
+- `~/.config/assets-store/` — user data (database, images)
+
+> **Note:** Never run `./scripts/install-arch.sh` with `sudo`. The script handles elevation internally for the `pacman` step only.
 
 ---
 
@@ -558,7 +632,7 @@ Test files are located in the `tests/` directory:
 
 **MIT License**
 
-Copyright (c) 2025 Assets Store
+Copyright (c) 2026 Assets Store
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -602,7 +676,7 @@ Built with modern web technologies:
 
 <div align="center">
 
-**Made with ❤️ and modern web technologies**
+**Made with modern web technologies**
 
 ⭐ Star this project if you find it useful!
 
