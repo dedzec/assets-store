@@ -175,18 +175,22 @@ export class SettingsPage {
   private async handleExport(): Promise<void> {
     const i18n = window.i18n;
     try {
-      const assets = await window.api.getAssets();
-      const dataStr = JSON.stringify(assets, null, 2);
+      const data = await window.api.exportData();
+      const dataStr = JSON.stringify(data, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `assets-export-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `assets-store-backup-${new Date().toISOString().split('T')[0]}.json`;
       link.click();
       
       URL.revokeObjectURL(url);
-      toast.success(i18n.t('settings.data.exportSuccess'));
+      toast.success(
+        i18n.t('settings.data.exportSuccess')
+          .replace('{assets}', String(data.assets.length))
+          .replace('{categories}', String(data.categories.length)),
+      );
     } catch (error) {
       console.error('Erro ao exportar dados:', error);
       toast.error(i18n.t('settings.data.exportError'));
@@ -209,34 +213,64 @@ export class SettingsPage {
         const text = await file.text();
         const data: unknown = JSON.parse(text);
 
-        if (!Array.isArray(data)) {
+        // New format: object with assets + categories + assetCategories
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          const d = data as Record<string, unknown>;
+          const assets = Array.isArray(d.assets) ? d.assets : [];
+          const categories = Array.isArray(d.categories) ? d.categories : [];
+
+          if (assets.length === 0 && categories.length === 0) {
+            toast.warning(i18n.t('settings.data.importNoValid'));
+            return;
+          }
+
+          const confirmed = await showConfirm(
+            i18n.t('settings.data.import'),
+            i18n.t('settings.data.importConfirm')
+              .replace('{assets}', String(assets.length))
+              .replace('{categories}', String(categories.length)),
+            'info',
+          );
+          if (!confirmed) return;
+
+          const result = await window.api.importData(data as Parameters<typeof window.api.importData>[0]);
+          toast.success(
+            i18n.t('settings.data.importSuccess')
+              .replace('{assets}', String(result.assets))
+              .replace('{categories}', String(result.categories)),
+          );
+        }
+        // Legacy format: plain array of assets
+        else if (Array.isArray(data)) {
+          const validItems = data.filter(
+            (item: unknown) =>
+              item && typeof item === 'object' &&
+              'title' in (item as Record<string, unknown>) &&
+              typeof (item as Record<string, string>).title === 'string' &&
+              (item as Record<string, string>).title.trim().length > 0,
+          );
+
+          if (validItems.length === 0) {
+            toast.warning(i18n.t('settings.data.importNoValid'));
+            return;
+          }
+
+          const confirmed = await showConfirm(
+            i18n.t('settings.data.import'),
+            i18n.t('settings.data.importLegacyConfirm').replace('{count}', String(validItems.length)),
+            'info',
+          );
+          if (!confirmed) return;
+
+          const result = await window.api.importData({ assets: validItems, categories: [], assetCategories: [] });
+          toast.success(
+            i18n.t('settings.data.importSuccess')
+              .replace('{assets}', String(result.assets))
+              .replace('{categories}', '0'),
+          );
+        } else {
           toast.error(i18n.t('settings.data.importInvalidFormat'));
-          return;
         }
-
-        // Validate that items have at least a title
-        const validItems = data.filter(
-          (item: unknown) =>
-            item && typeof item === 'object' &&
-            'title' in (item as Record<string, unknown>) &&
-            typeof (item as Record<string, string>).title === 'string' &&
-            (item as Record<string, string>).title.trim().length > 0,
-        );
-
-        if (validItems.length === 0) {
-          toast.warning(i18n.t('settings.data.importNoValid'));
-          return;
-        }
-
-        const confirmed = await showConfirm(
-          i18n.t('settings.data.import'),
-          i18n.t('settings.data.importConfirm').replace('{count}', String(validItems.length)),
-          'info',
-        );
-        if (!confirmed) return;
-
-        const result = await window.api.importAssets(validItems);
-        toast.success(i18n.t('settings.data.importSuccess').replace('{count}', String(result.imported)));
       } catch (error) {
         console.error('Erro ao importar dados:', error);
         if (error instanceof SyntaxError) {

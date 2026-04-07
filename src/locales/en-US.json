@@ -105,14 +105,15 @@
       "description": "Manage your registered data",
       "export": "Export Data",
       "import": "Import Data",
-      "exportSuccess": "Data exported successfully!",
+      "exportSuccess": "Data exported successfully! ({assets} assets, {categories} categories)",
       "exportError": "Error exporting data. Please try again.",
-      "importConfirm": "Do you want to import {count} asset(s)? Data will be added to existing records.",
-      "importSuccess": "{count} asset(s) imported successfully!",
+      "importConfirm": "Do you want to import {assets} asset(s) and {categories} category(ies)? Data will be added to existing records.",
+      "importSuccess": "{assets} asset(s) and {categories} category(ies) imported successfully!",
       "importError": "Error importing data. Please try again.",
-      "importInvalidFormat": "Invalid format. File must contain a JSON array.",
+      "importInvalidFormat": "Invalid format. File must contain valid JSON with assets and categories.",
       "importInvalidJson": "Invalid JSON file. Please check the format.",
-      "importNoValid": "No valid items found in the file."
+      "importNoValid": "No valid items found in the file.",
+      "importLegacyConfirm": "Legacy format detected. Do you want to import {count} asset(s)?"
     },
     "danger": {
       "title": "Danger Zone",

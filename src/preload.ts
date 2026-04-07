@@ -31,6 +31,9 @@ export const api = {
   // Settings
   getSettings: () => ipcRenderer.invoke(IPC_CHANNELS.GET_SETTINGS),
   setSetting: (key: string, value: string) => ipcRenderer.invoke(IPC_CHANNELS.SET_SETTING, key, value),
+  // Data export/import (all tables)
+  exportData: () => ipcRenderer.invoke(IPC_CHANNELS.EXPORT_DATA),
+  importData: (data: unknown) => ipcRenderer.invoke(IPC_CHANNELS.IMPORT_DATA, data),
 };
 
 contextBridge.exposeInMainWorld('api', api);

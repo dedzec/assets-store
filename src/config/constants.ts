@@ -27,6 +27,8 @@ export const IPC_CHANNELS = {
   SET_ASSET_CATEGORIES: 'set-asset-categories',
   GET_SETTINGS: 'get-settings',
   SET_SETTING: 'set-setting',
+  EXPORT_DATA: 'export-data',
+  IMPORT_DATA: 'import-data',
 } as const;
 
 // Route Names

@@ -329,14 +329,153 @@ function registerIpcHandlers(): void {
     }
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value);
   });
+
+  // ─── Export / Import (all tables) ───────────────────────────────────
+
+  ipcMain.handle(IPC_CHANNELS.EXPORT_DATA, () => {
+    const assets = db.prepare('SELECT * FROM assets ORDER BY id ASC').all();
+    const categories = db.prepare('SELECT * FROM categories ORDER BY id ASC').all();
+    const assetCategories = db.prepare('SELECT * FROM asset_categories ORDER BY assetId, categoryId').all();
+
+    return {
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      assets,
+      categories,
+      assetCategories,
+    };
+  });
+
+  ipcMain.handle(IPC_CHANNELS.IMPORT_DATA, (_, data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid import data');
+    }
+
+    const d = data as Record<string, unknown>;
+    const assets = Array.isArray(d.assets) ? d.assets : [];
+    const categories = Array.isArray(d.categories) ? d.categories : [];
+    const assetCategories = Array.isArray(d.assetCategories) ? d.assetCategories : [];
+
+    const importAll = db.transaction(() => {
+      let importedAssets = 0;
+      let importedCategories = 0;
+
+      // Map old IDs → new IDs for relationship linking
+      const assetIdMap = new Map<number, number>();
+      const categoryIdMap = new Map<number, number>();
+
+      // Import categories
+      const insertCat = db.prepare('INSERT INTO categories (name, color) VALUES (?, ?)');
+      for (const cat of categories) {
+        if (!cat || typeof cat !== 'object') continue;
+        const c = cat as Record<string, unknown>;
+        if (typeof c.name !== 'string' || !c.name.trim()) continue;
+        const color = typeof c.color === 'string' ? c.color : '#667eea';
+
+        // Skip if category with same name already exists
+        const existing = db.prepare('SELECT id FROM categories WHERE name = ?').get(c.name.trim()) as { id: number } | undefined;
+        if (existing) {
+          categoryIdMap.set(c.id as number, existing.id);
+        } else {
+          const result = insertCat.run(c.name.trim(), color);
+          categoryIdMap.set(c.id as number, result.lastInsertRowid as number);
+          importedCategories++;
+        }
+      }
+
+      // Import assets
+      const insertAsset = db.prepare(
+        'INSERT INTO assets (title, image, version, unity, unreal, link, linkType) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      );
+      for (const item of assets) {
+        if (!validateAssetInput(item)) continue;
+        const result = insertAsset.run(
+          item.title.trim(),
+          item.image ?? '',
+          item.version ?? '',
+          item.unity ?? '',
+          item.unreal ?? '',
+          item.link ?? '',
+          item.linkType ?? '',
+        );
+        assetIdMap.set((item as unknown as Record<string, unknown>).id as number, result.lastInsertRowid as number);
+        importedAssets++;
+      }
+
+      // Restore asset ↔ category relationships
+      const insertRel = db.prepare('INSERT OR IGNORE INTO asset_categories (assetId, categoryId) VALUES (?, ?)');
+      for (const rel of assetCategories) {
+        if (!rel || typeof rel !== 'object') continue;
+        const r = rel as Record<string, unknown>;
+        const newAssetId = assetIdMap.get(r.assetId as number);
+        const newCatId = categoryIdMap.get(r.categoryId as number);
+        if (newAssetId && newCatId) {
+          insertRel.run(newAssetId, newCatId);
+        }
+      }
+
+      return { assets: importedAssets, categories: importedCategories };
+    });
+
+    return importAll();
+  });
+}
+
+// ─── Window state persistence ────────────────────────────────────────
+
+const WINDOW_STATE_KEY = 'window-state';
+
+interface WindowState {
+  width: number;
+  height: number;
+  x?: number;
+  y?: number;
+  isMaximized: boolean;
+}
+
+function loadWindowState(): WindowState {
+  try {
+    const db = getDb();
+    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(WINDOW_STATE_KEY) as { value: string } | undefined;
+    if (row) return JSON.parse(row.value);
+  } catch { /* ignore */ }
+  return {
+    width: APP_CONFIG.window.width,
+    height: APP_CONFIG.window.height,
+    isMaximized: false,
+  };
+}
+
+function saveWindowState(): void {
+  if (!mainWindow) return;
+  try {
+    const db = getDb();
+    const isMaximized = mainWindow.isMaximized();
+    // Save the normal (non-maximized) bounds so restore works correctly
+    const bounds = isMaximized ? mainWindow.getNormalBounds() : mainWindow.getBounds();
+    const state: WindowState = {
+      width: bounds.width,
+      height: bounds.height,
+      x: bounds.x,
+      y: bounds.y,
+      isMaximized,
+    };
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(WINDOW_STATE_KEY, JSON.stringify(state));
+  } catch (e) {
+    log.error('Failed to save window state:', e);
+  }
 }
 
 // ─── Window management ───────────────────────────────────────────────
 
 const createWindow = (): void => {
+  const state = loadWindowState();
+
   mainWindow = new BrowserWindow({
-    width: APP_CONFIG.window.width,
-    height: APP_CONFIG.window.height,
+    width: state.width,
+    height: state.height,
+    x: state.x,
+    y: state.y,
     minWidth: APP_CONFIG.window.minWidth,
     minHeight: APP_CONFIG.window.minHeight,
     frame: false,
@@ -349,11 +488,23 @@ const createWindow = (): void => {
     },
   });
 
+  // Restore maximized state
+  if (state.isMaximized) {
+    mainWindow.maximize();
+  }
+
   // Exibe a janela somente quando o conteúdo estiver totalmente renderizado
   const win = mainWindow;
   win.once('ready-to-show', () => {
     win.show();
   });
+
+  // Save window state on move, resize, maximize, and unmaximize
+  win.on('resize', saveWindowState);
+  win.on('move', saveWindowState);
+  win.on('maximize', saveWindowState);
+  win.on('unmaximize', saveWindowState);
+  win.on('close', saveWindowState);
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
