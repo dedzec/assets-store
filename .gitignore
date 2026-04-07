@@ -91,10 +91,13 @@ typings/
 # Electron-Forge
 out/
 
+# Arch Linux package (gerado por makepkg na raiz do projeto)
+*.pkg.tar.zst
+*.pkg.tar.xz
+pkg/
+src.tar.gz
+
 # Local database
 data/
 *.sqlite
 *.sqlite-journal
-
-# Local documentation (internal notes, not for publishing)
-docs/

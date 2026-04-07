@@ -25,6 +25,8 @@ export const IPC_CHANNELS = {
   DELETE_CATEGORY: 'delete-category',
   GET_ASSET_CATEGORIES: 'get-asset-categories',
   SET_ASSET_CATEGORIES: 'set-asset-categories',
+  GET_SETTINGS: 'get-settings',
+  SET_SETTING: 'set-setting',
 } as const;
 
 // Route Names
@@ -43,7 +45,7 @@ export const STORAGE_KEYS = {
 } as const;
 
 // Theme Palettes
-export const THEME_PALETTES = ['purple', 'blue', 'ocean', 'forest', 'sunset', 'rose'] as const;
+export const THEME_PALETTES = ['purple', 'blue', 'ocean', 'forest', 'sunset', 'rose', 'cherry', 'lavender', 'gold', 'slate'] as const;
 export const THEME_MODES = ['light', 'dark'] as const;
 
 // Locale Codes

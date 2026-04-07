@@ -28,4 +28,7 @@ export interface ElectronAPI {
   deleteCategory: (id: number) => Promise<{ changes: number }>;
   getAssetCategories: (assetId: number) => Promise<Category[]>;
   setAssetCategories: (assetId: number, categoryIds: number[]) => Promise<void>;
+  // Settings
+  getSettings: () => Promise<Record<string, string>>;
+  setSetting: (key: string, value: string) => Promise<void>;
 }

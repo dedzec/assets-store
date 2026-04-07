@@ -21,25 +21,28 @@ export class I18n {
       'pt-BR': ptBR,
       'en-US': enUS,
     };
-    this.currentLocale = this.loadLocale();
+    // Default to browser language — real value loaded via init()
+    const browserLang = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
+    this.currentLocale = browserLang.startsWith('pt') ? 'pt-BR' : 'en-US';
   }
 
-  private loadLocale(): Locale {
-    const saved = localStorage.getItem(this.STORAGE_KEY) as Locale;
-    if (saved && this.translations[saved]) {
-      return saved;
+  /** Initialize with persisted locale from main process; migrates localStorage on first run */
+  init(savedLocale?: string): void {
+    if (savedLocale && this.translations[savedLocale as Locale]) {
+      this.currentLocale = savedLocale as Locale;
+    } else {
+      // Migrate from localStorage if available
+      const local = localStorage.getItem(this.STORAGE_KEY) as Locale;
+      if (local && this.translations[local]) {
+        this.currentLocale = local;
+        this.saveLocale(local);
+        localStorage.removeItem(this.STORAGE_KEY);
+      }
     }
-    
-    // Auto-detect browser language
-    const browserLang = navigator.language;
-    if (browserLang.startsWith('pt')) {
-      return 'pt-BR';
-    }
-    return 'en-US';
   }
 
   private saveLocale(locale: Locale): void {
-    localStorage.setItem(this.STORAGE_KEY, locale);
+    window.api?.setSetting(this.STORAGE_KEY, locale);
   }
 
   getLocale(): Locale {

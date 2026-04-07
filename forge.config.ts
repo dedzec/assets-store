@@ -2,15 +2,38 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
+import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    // asar como objeto permite definir `unpack` para binários nativos
+    asar: {
+      unpack: '**/node_modules/better-sqlite3/**',
+    },
+    // Inclui better-sqlite3 e suas deps de runtime (o resto é bundlado pelo Vite)
+    // better-sqlite3 → bindings → file-uri-to-path
+    ignore: [
+      /^\/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path))/,
+      /^\/src\//,
+      /^\/tests\//,
+      /^\/scripts\//,
+      /^\/docs\//,
+      /^\/data\//,
+      /^\/PKGBUILD$/,
+      /^\/pkg\//,
+      /^\/src\//,
+      /^\/\.git\//,
+      /^\/forge\.config\.ts$/,
+      /^\/tsconfig\.json$/,
+      /^\/vite\..*\.config\.ts$/,
+      /^\/index\.html$/,
+    ],
     name: 'assets-store',
     executableName: 'assets-store',
+    icon: 'src/assets/icon',
   },
   rebuildConfig: {
     onlyModules: ['better-sqlite3'],
@@ -36,6 +59,8 @@ const config: ForgeConfig = {
     // an incompatible %install spec section on Arch Linux.
   ],
   plugins: [
+    // Copia e desempacota automaticamente módulos nativos (.node) do asar
+    new AutoUnpackNativesPlugin({}),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.
