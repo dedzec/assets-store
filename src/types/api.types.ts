@@ -31,4 +31,16 @@ export interface ElectronAPI {
   // Settings
   getSettings: () => Promise<Record<string, string>>;
   setSetting: (key: string, value: string) => Promise<void>;
+  // Data export/import (all tables)
+  exportData: () => Promise<ExportData>;
+  importData: (data: ExportData) => Promise<{ assets: number; categories: number }>;
+}
+
+/** Full database export format */
+export interface ExportData {
+  version: string;
+  exportedAt: string;
+  assets: Asset[];
+  categories: Category[];
+  assetCategories: Array<{ assetId: number; categoryId: number }>;
 }

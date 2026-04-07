@@ -105,14 +105,15 @@
       "description": "Gerencie seus dados cadastrados",
       "export": "Exportar Dados",
       "import": "Importar Dados",
-      "exportSuccess": "Dados exportados com sucesso!",
+      "exportSuccess": "Dados exportados com sucesso! ({assets} ativos, {categories} categorias)",
       "exportError": "Erro ao exportar dados. Tente novamente.",
-      "importConfirm": "Deseja importar {count} ativo(s)? Os dados serão adicionados aos existentes.",
-      "importSuccess": "{count} ativo(s) importado(s) com sucesso!",
+      "importConfirm": "Deseja importar {assets} ativo(s) e {categories} categoria(s)? Os dados serão adicionados aos existentes.",
+      "importSuccess": "{assets} ativo(s) e {categories} categoria(s) importado(s) com sucesso!",
       "importError": "Erro ao importar dados. Tente novamente.",
-      "importInvalidFormat": "Formato inválido. O arquivo deve conter um array JSON.",
+      "importInvalidFormat": "Formato inválido. O arquivo deve conter um JSON válido com assets e categories.",
       "importInvalidJson": "Arquivo JSON inválido. Verifique o formato.",
-      "importNoValid": "Nenhum item válido encontrado no arquivo."
+      "importNoValid": "Nenhum item válido encontrado no arquivo.",
+      "importLegacyConfirm": "Formato antigo detectado. Deseja importar {count} ativo(s)?"
     },
     "danger": {
       "title": "Zona de Perigo",
